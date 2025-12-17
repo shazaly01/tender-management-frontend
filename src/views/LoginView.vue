@@ -23,8 +23,8 @@
           <div class="text-center mb-8">
             <!-- [مُعدَّل] استخدم شعار مشروعك وعنوانه -->
             <img src="/logo3.png" alt="Project Logo" class="w-24 h-24 mx-auto mb-4 rounded-full" />
-            <h1 class="text-4xl font-bold text-white tracking-wider">كور للعطاءات</h1>
-            <p class="mt-2 text-slate-300 opacity-80 text-lg">لادارة العطاءات</p>
+            <h1 class="text-4xl font-bold text-white tracking-wider">حصر الديون</h1>
+            <p class="mt-2 text-slate-300 opacity-80 text-lg"></p>
           </div>
 
           <!-- [مُعدَّل] رسالة الخطأ مدمجة هنا -->
