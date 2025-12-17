@@ -9,23 +9,18 @@
       :items="documents"
       :is-loading="loading"
     >
-      <!-- تنسيق التاريخ -->
       <template #cell-created_at="{ item }">
         <span>{{ formatDate(item.created_at) }}</span>
       </template>
 
-      <!-- أزرار الإجراءات -->
       <template #cell-actions="{ item }">
         <div class="flex items-center space-x-2 space-x-reverse">
-          <!-- زر التحميل -->
-          <a
-            :href="item.file_url"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            @click="$emit('preview', item)"
             class="p-1 text-sky-500 hover:text-sky-400 transition-colors"
-            title="تحميل/عرض المستند"
+            title="معاينة المستند"
           >
-            <!-- أيقونة تحميل -->
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
               <path
@@ -34,14 +29,13 @@
                 clip-rule="evenodd"
               ></path>
             </svg>
-          </a>
-          <!-- زر الحذف -->
+          </button>
+
           <button
             @click="$emit('delete', item)"
             class="p-1 text-rose-500 hover:text-rose-400 transition-colors"
             title="حذف المستند"
           >
-            <!-- أيقونة سلة مهملات -->
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
@@ -54,7 +48,6 @@
       </template>
     </AppTable>
 
-    <!-- رسالة في حالة عدم وجود مستندات -->
     <div
       v-else
       class="text-center text-text-muted py-8 border-2 border-dashed border-surface-border rounded-md"
@@ -68,24 +61,14 @@
 import AppTable from '@/components/ui/AppTable.vue'
 import { formatDate } from '@/utils/formatters'
 
-// هذا المكون عرضي بحت
 defineProps({
-  documents: {
-    type: Array,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: null,
-  },
+  documents: { type: Array, required: true },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: null },
 })
 
-// إصدار حدث الحذف للأعلى
-defineEmits(['delete'])
+// تعريف الأحداث: الحذف والمعاينة
+defineEmits(['delete', 'preview'])
 
 const tableHeaders = [
   { key: 'id', label: '#' },
