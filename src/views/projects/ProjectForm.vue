@@ -25,7 +25,7 @@
         v-model="form.contract_value"
         type="number"
         step="0.01"
-        placeholder="ادخل قيمة العقد بالريال السعودي"
+        placeholder="ادخل قيمة العقد الكلية"
         required
       />
 

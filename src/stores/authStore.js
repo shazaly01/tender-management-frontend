@@ -36,17 +36,22 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
-        // استدعاء الـ API أولاً
+        // محاولة استدعاء الـ API لتسجيل الخروج من السيرفر
         await authService.logout()
       } catch (error) {
         console.error('Logout API call failed, but clearing local state anyway:', error)
       } finally {
-        // [التعديل هنا]: دائمًا قم بتنظيف الحالة المحلية، حتى لو فشل استدعاء الـ API
+        // --- تنظيف الحالة المحلية ---
         this.user = null
         this.token = null
+        this.returnUrl = null
+
         localStorage.removeItem('token')
         localStorage.removeItem('user')
-        // التوجيه يجب أن يتم من المكون الذي يستدعي هذه الدالة
+
+        // --- [الحل هنا] التوجيه الإجباري لصفحة الدخول ---
+        // نستخدم window.location.href لضمان تنظيف الذاكرة تماماً
+        window.location.href = '/login'
       }
     },
 
