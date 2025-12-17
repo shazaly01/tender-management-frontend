@@ -6,7 +6,7 @@
     <div class="flex h-16 items-center justify-between px-5 flex-shrink-0">
       <RouterLink :to="{ name: 'Dashboard' }" class="flex items-center gap-2">
         <!-- [تعديل 1]: يمكنك تغيير الأيقونة هنا -->
-        <img src="/logo12.ico" alt="Project Logo" class="w-8 h-8 rounded-md" />
+        <img src="/MainLogo2.png" alt="Project Logo" class="w-8 h-8 rounded-md" />
         <!-- [تعديل 2]: تغيير اسم المشروع -->
         <h1 class="text-xl font-bold text-text-primary">حصر الديون</h1>
       </RouterLink>
@@ -110,7 +110,7 @@ const route = useRoute()
 const allNavLinks = shallowRef([
   { name: 'لوحة التحكم', routeName: 'Dashboard', icon: HomeIcon, permission: 'dashboard.view' },
   {
-    name: 'إدارة العطاءات',
+    name: 'الحصر',
     icon: BuildingOffice2Icon, // أيقونة جديدة
     permission: 'company.view', // صلاحية المجموعة
     children: [

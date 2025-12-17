@@ -52,7 +52,7 @@
       v-else
       class="text-center text-text-muted py-8 border-2 border-dashed border-surface-border rounded-md"
     >
-      <p>لم يتم رفع أي مستندات لهذه الشركة بعد.</p>
+      <p>لم يتم رفع أي مستندات بعد.</p>
     </div>
   </div>
 </template>

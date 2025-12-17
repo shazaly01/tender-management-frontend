@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- (لا تغيير في هذا القسم) -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-text-primary">إدارة الشركات</h1>
       <AppButton v-if="authStore.can('company.create')" @click="openCompanyModal()">
@@ -9,7 +8,32 @@
     </div>
 
     <AppCard>
-      <!-- (لا تغيير في هذا القسم) -->
+      <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div class="relative w-full md:w-96">
+          <span
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </span>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="بحث باسم الشركة، الرقم الضريبي، أو الرخصة..."
+            class="block w-full pl-10 pr-4 py-2 border border-surface-border rounded-lg bg-surface-ground text-text-primary focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all sm:text-sm"
+            @input="onSearch"
+          />
+        </div>
+
+        <div class="text-sm text-text-muted">إجمالي الشركات: {{ pagination.total || 0 }}</div>
+      </div>
+
       <AppTable :headers="tableHeaders" :items="companies" :is-loading="loading">
         <template #cell-actions="{ item }">
           <div class="flex items-center space-x-2 space-x-reverse">
@@ -25,6 +49,7 @@
                 ></path>
               </svg>
             </button>
+
             <button
               v-if="authStore.can('company.update')"
               @click.stop="openCompanyModal(item)"
@@ -37,6 +62,7 @@
                 ></path>
               </svg>
             </button>
+
             <button
               v-if="authStore.can('company.delete')"
               @click.stop="openDeleteDialog(item)"
@@ -54,37 +80,41 @@
           </div>
         </template>
       </AppTable>
+
       <AppPagination :meta="pagination" @page-change="handlePageChange" />
     </AppCard>
 
-    <!-- (لا تغيير في هذا القسم) -->
     <CompanyModal
       v-if="isModalOpen"
       v-model="isModalOpen"
       :company="selectedCompany"
       @save="handleSaveCompany"
     />
+
     <AppConfirmDialog
       v-model="isDeleteDialogOpen"
       title="تأكيد حذف الشركة"
       :message="`هل أنت متأكد من رغبتك في حذف شركة '${companyToDelete?.name}'؟`"
       @confirmed="deleteSelectedCompany"
     />
+
     <DocumentsManagerModal
       v-if="isDocumentsModalOpen"
       v-model="isDocumentsModalOpen"
-      :company="companyForDocuments"
+      :owner="companyForDocuments"
+      target-type="company"
     />
   </div>
 </template>
 
 <script setup>
-// (لا تغيير في قسم الاستيراد)
 import { ref, onMounted, computed } from 'vue'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+
+// استيراد المكونات
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppCard from '@/components/ui/AppCard.vue'
@@ -93,19 +123,23 @@ import CompanyModal from './CompanyModal.vue'
 import AppPagination from '@/components/ui/AppPagination.vue'
 import DocumentsManagerModal from '@/views/documents/DocumentsManagerModal.vue'
 
-// (لا تغيير في قسم الإعدادات)
+// --- الإعدادات وحالة المتجر ---
 const companyStore = useCompanyStore()
 const authStore = useAuthStore()
 const { companies, loading, pagination } = storeToRefs(companyStore)
 const toast = useToast()
 
-// === [تم التعديل هنا] ===
+// --- حالة البحث ---
+const searchQuery = ref('')
+let searchTimeout = null
+
+// --- تعريف أعمدة الجدول ---
 const tableHeaders = computed(() => {
   const headers = [
     { key: 'id', label: '#' },
     { key: 'name', label: 'اسم الشركة' },
     { key: 'tax_number', label: 'الرقم الضريبي' },
-    { key: 'license_number', label: 'رقم الرخصة' }, // تمت إضافة العمود الجديد
+    { key: 'license_number', label: 'رقم الرخصة' },
     { key: 'owner_name', label: 'اسم المالك' },
   ]
   if (
@@ -117,27 +151,42 @@ const tableHeaders = computed(() => {
   }
   return headers
 })
-// === [نهاية التعديل] ===
 
-// (لا تغيير في بقية الكود)
+// --- دوال جلب البيانات والبحث ---
+
+// دالة جلب البيانات (تدعم الترقيم والبحث)
 const handlePageChange = (page = 1) => {
-  companyStore.fetchCompanies(page).catch(() => {
+  companyStore.fetchCompanies(page, searchQuery.value).catch(() => {
     toast.error('حدث خطأ أثناء جلب بيانات الشركات.')
   })
 }
+
+// دالة مراقبة الكتابة في حقل البحث (Debounce)
+const onSearch = () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    handlePageChange(1) // العودة للصفحة الأولى عند كل بحث جديد
+  }, 500) // تأخير نصف ثانية لتقليل الطلبات للسيرفر
+}
+
 onMounted(() => {
   handlePageChange()
 })
+
+// --- منطق إضافة/تعديل الشركات ---
 const isModalOpen = ref(false)
 const selectedCompany = ref(null)
+
 const openCompanyModal = (company = null) => {
   if (company && !authStore.can('company.update')) {
     toast.error('ليس لديك الصلاحية لتعديل هذه الشركة.')
     return
   }
+  // نمرر نسخة من البيانات لتجنب التعديل المباشر في الجدول قبل الحفظ
   selectedCompany.value = company ? { ...company } : null
   isModalOpen.value = true
 }
+
 const handleSaveCompany = async (formData) => {
   try {
     if (formData.id) {
@@ -154,21 +203,28 @@ const handleSaveCompany = async (formData) => {
     toast.error(errorMessage)
   }
 }
+
+// --- منطق الحذف ---
 const isDeleteDialogOpen = ref(false)
 const companyToDelete = ref(null)
+
 const openDeleteDialog = (company) => {
   companyToDelete.value = company
   isDeleteDialogOpen.value = true
 }
+
 const deleteSelectedCompany = async () => {
   if (companyToDelete.value) {
     try {
       await companyStore.deleteCompany(companyToDelete.value.id)
       toast.success(`تم حذف شركة '${companyToDelete.value.name}' بنجاح.`)
-      if (companies.value.length === 1 && pagination.value.current_page > 1) {
-        await handlePageChange(pagination.value.current_page - 1)
+
+      // إذا كانت الصفحة الحالية أصبحت فارغة بعد الحذف، نعود للصفحة السابقة
+      const currentPage = pagination.value.current_page
+      if (companies.value.length === 1 && currentPage > 1) {
+        await handlePageChange(currentPage - 1)
       } else {
-        await handlePageChange(pagination.value.current_page)
+        await handlePageChange(currentPage)
       }
     } catch (error) {
       toast.error('حدث خطأ أثناء محاولة الحذف.')
@@ -178,8 +234,11 @@ const deleteSelectedCompany = async () => {
     }
   }
 }
+
+// --- منطق إدارة المستندات ---
 const isDocumentsModalOpen = ref(false)
 const companyForDocuments = ref(null)
+
 const openDocumentsManager = (company) => {
   companyForDocuments.value = company
   isDocumentsModalOpen.value = true

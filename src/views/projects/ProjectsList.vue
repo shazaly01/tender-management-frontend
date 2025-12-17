@@ -9,7 +9,12 @@
     </div>
 
     <!-- قطعة الليغو 1: الفلتر -->
-    <ProjectsFilter v-model="selectedCompanyId" @update:modelValue="handlePageChange(1)" />
+    <ProjectsFilter
+      v-model="selectedCompanyId"
+      v-model:searchQuery="searchQuery"
+      @update:modelValue="handlePageChange(1)"
+      @update:searchQuery="onSearch"
+    />
 
     <!-- قطعة الليغو 2: الجدول -->
     <ProjectsTable
@@ -19,7 +24,9 @@
       @page-change="handlePageChange"
       @edit-project="openProjectModal"
       @delete-project="openDeleteDialog"
+      @manage-payments="openPaymentsManager"
       @row-clicked="openPaymentsManager"
+      @manage-documents="openDocumentsManager"
     />
 
     <!-- المودالات (تبقى هنا لأنها تدار بواسطة هذا المكون) -->
@@ -40,6 +47,13 @@
       v-model="isPaymentsModalOpen"
       :project="projectForPayments"
     />
+
+    <DocumentsManagerModal
+      v-if="isDocumentsModalOpen"
+      v-model="isDocumentsModalOpen"
+      :owner="projectForDocuments"
+      target-type="project"
+    />
   </div>
 </template>
 
@@ -57,6 +71,7 @@ import ProjectsTable from './ProjectsTable.vue' // <-- قطعة الليغو 2
 import ProjectModal from './ProjectModal.vue'
 import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
 import PaymentsManagerModal from '@/views/payments/PaymentsManagerModal.vue'
+import DocumentsManagerModal from '@/views/documents/DocumentsManagerModal.vue'
 
 // --- إدارة الحالة (هنا يعيش "العقل") ---
 const projectStore = useProjectStore()
@@ -65,13 +80,32 @@ const { projects, loading, pagination } = storeToRefs(projectStore)
 const toast = useToast()
 
 const selectedCompanyId = ref(null) // حالة الفلتر
+const isDocumentsModalOpen = ref(false)
+const projectForDocuments = ref(null)
+
+const searchQuery = ref('') // حالة نص البحث الجديدة
+let searchTimeout = null // مؤقت البحث
+
+// دالة البحث مع Debounce (نصف ثانية)
+const onSearch = () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    handlePageChange(1) // العودة للصفحة الأولى عند البحث
+  }, 500)
+}
+
+const openDocumentsManager = (project) => {
+  projectForDocuments.value = project
+  isDocumentsModalOpen.value = true
+}
 
 // --- دوال جلب البيانات ---
 const handlePageChange = (page = 1) => {
-  const filters = {}
-  if (selectedCompanyId.value) {
-    filters.company_id = selectedCompanyId.value
+  const filters = {
+    search: searchQuery.value,
+    company_id: selectedCompanyId.value,
   }
+
   projectStore.fetchProjects(page, filters).catch(() => {
     toast.error('حدث خطأ أثناء جلب بيانات المشاريع.')
   })

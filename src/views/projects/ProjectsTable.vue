@@ -40,6 +40,18 @@
             </svg>
           </button>
 
+          <button
+            v-if="authStore.can('document.view')"
+            @click.stop="$emit('manage-documents', item)"
+            class="p-1 text-teal-500 hover:text-teal-400 transition-colors"
+            title="إدارة المستندات"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V8a2 2 0 00-2-2h-5L9 4H4z"
+              ></path>
+            </svg>
+          </button>
           <!-- زر التعديل -->
           <button
             v-if="authStore.can('project.update')"
@@ -101,6 +113,7 @@ const emit = defineEmits([
   'edit-project',
   'delete-project',
   'manage-payments',
+  'manage-documents', // أضف هذا السطر
   'row-clicked',
 ])
 
@@ -118,7 +131,8 @@ const tableHeaders = computed(() => {
   if (
     authStore.can('project.update') ||
     authStore.can('project.delete') ||
-    authStore.can('payment.view')
+    authStore.can('payment.view') ||
+    authStore.can('document.view')
   ) {
     headers.push({ key: 'actions', label: 'إجراءات', class: 'text-left' })
   }

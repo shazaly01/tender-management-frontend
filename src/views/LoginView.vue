@@ -7,6 +7,7 @@
       <div class="aurora-shape shape3"></div>
     </div>
 
+    <div class="watermark-overlay"></div>
     <!-- 2. المحتوى الرئيسي مع بطاقة تسجيل الدخول -->
     <div class="relative z-10 flex min-h-screen items-center justify-center p-4">
       <div
@@ -22,7 +23,7 @@
         <div class="relative z-10">
           <div class="text-center mb-8">
             <!-- [مُعدَّل] استخدم شعار مشروعك وعنوانه -->
-            <img src="/logo3.png" alt="Project Logo" class="w-24 h-24 mx-auto mb-4 rounded-full" />
+            <img src="/MainLogo.png" alt="Project Logo" class="logo-main mx-auto mb-4" />
             <h1 class="text-4xl font-bold text-white tracking-wider">حصر الديون</h1>
             <p class="mt-2 text-slate-300 opacity-80 text-lg"></p>
           </div>
@@ -165,7 +166,7 @@ const handleLogin = async () => {
 .shape1 {
   width: 600px;
   height: 600px;
-  background-color: rgba(16, 185, 129, 0.3); /* primary color */
+  background-color: rgba(30, 58, 138, 0.3); /* أزرق كحلي نقي */
   top: -150px;
   left: -200px;
   animation: move 25s infinite alternate;
@@ -181,7 +182,7 @@ const handleLogin = async () => {
 .shape3 {
   width: 500px;
   height: 500px;
-  background-color: rgba(5, 150, 105, 0.2); /* darker primary */
+  background-color: rgba(37, 99, 235, 0.2); /* أزرق ملكي */
   bottom: 50px;
   left: 20%;
   animation: move 22s infinite alternate;
@@ -216,9 +217,9 @@ const handleLogin = async () => {
   height: 400px;
   background: radial-gradient(
     circle,
-    rgba(16, 185, 129, 0.2) 0%,
-    rgba(16, 185, 129, 0) 60%
-  ); /* primary color */
+    rgba(37, 99, 235, 0.15) 0%,
+    /* تغيير الأخضر للأزرق */ rgba(37, 99, 235, 0) 60%
+  );
   pointer-events: none;
   transition:
     left 0.1s ease,
@@ -239,8 +240,8 @@ const handleLogin = async () => {
 }
 .form-input:focus {
   outline: none;
-  border-color: #10b981; /* primary */
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+  border-color: #2563eb; /* أزرق */
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
 }
 
 .input-icon {
@@ -260,19 +261,58 @@ const handleLogin = async () => {
   font-size: 16px;
   font-weight: bold;
   color: white;
-  background: linear-gradient(90deg, #10b981, #22c55e); /* primary and success */
+  background: linear-gradient(90deg, #1e3a8a, #3b82f6); /* تدرج كحلي إلى أزرق */
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 20px rgba(30, 58, 138, 0.3);
 }
+
 .submit-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
 }
 .submit-button:disabled {
   background: #374151;
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.watermark-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+
+  /* 1. الشفافية: غير هذا الرقم لتفتيح أو تغميق الشعار */
+  opacity: 0.05;
+
+  background-image: url('/Core_Logo.png');
+  background-repeat: repeat;
+
+  /* 2. الحجم والعدد:
+     - رقم أصغر (مثل 80px) = شعارات كثيرة وصغيرة ومتقاربة.
+     - رقم أكبر (مثل 200px) = شعارات قليلة وكبيرة ومتباعدة.
+  */
+  background-size: 300px;
+
+  /* 3. اختيارياً: يمكنك إضافة تباعد داخلي وهمي عبر التحجيم */
+  transform: rotate(-15deg) scale(1.1);
+}
+
+.logo-main {
+  /* العرض 160 بكسل والطول سيتحدد تلقائياً ليحافظ على أبعاد الصورة 1.7:1 */
+  width: 160px;
+  height: auto;
+
+  /* التأكد من عدم وجود أي قص أو تدوير */
+  border-radius: 0;
+  object-fit: contain;
+
+  /* اختيارياً: إضافة ظل خفيف ليعطي عمق للشعار فوق الخلفية الزجاجية */
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2));
 }
 </style>

@@ -12,17 +12,19 @@ export const useCompanyStore = defineStore('company', () => {
   const error = ref(null)
 
   // --- Actions ---
-  async function fetchCompanies(page = 1) {
+  // أضفنا بارامتر search بقيمة افتراضية فارغة
+  async function fetchCompanies(page = 1, search = '') {
     loading.value = true
     error.value = null
     try {
-      const response = await companyService.get(page)
+      // نمرر الـ search إلى الـ service
+      const response = await companyService.get(page, search)
       companies.value = response.data.data
       pagination.value = response.data.meta
     } catch (err) {
       error.value = 'Failed to fetch companies.'
       console.error(err)
-      companies.value = [] // أعدها إلى مصفوفة فارغة عند الخطأ
+      companies.value = []
     } finally {
       loading.value = false
     }

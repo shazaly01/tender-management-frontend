@@ -1,24 +1,22 @@
-// src/stores/documentStore.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import documentService from '@/services/documentService'
 
 export const useDocumentStore = defineStore('document', () => {
-  // --- State ---
   const documents = ref([])
   const loading = ref(false)
   const error = ref(null)
 
-  // --- Actions ---
-  async function fetchDocuments(companyId) {
+  // نمرر المعرف والنوع للجلب الصحيح
+  async function fetchDocuments(targetId, targetType) {
     loading.value = true
     error.value = null
     try {
-      const response = await documentService.get(companyId)
+      // نرسل البارامترات للـ API (يجب أن يدعم السيرفر الفلترة بـ target_type)
+      const response = await documentService.get(targetId, targetType)
       documents.value = response.data.data
     } catch (err) {
       error.value = 'Failed to fetch documents.'
-      console.error(err)
       documents.value = []
     } finally {
       loading.value = false
@@ -30,40 +28,29 @@ export const useDocumentStore = defineStore('document', () => {
     error.value = null
     try {
       await documentService.create(payload)
-      // بعد الإنشاء الناجح، أعد تحميل قائمة المستندات لنفس الشركة
-      await fetchDocuments(payload.company_id)
+      // التحديث بعد الرفع باستخدام البيانات الجديدة
+      await fetchDocuments(payload.target_id, payload.target_type)
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to upload document.'
-      console.error(err)
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  async function deleteDocument(docId, companyId) {
+  async function deleteDocument(docId, targetId, targetType) {
     loading.value = true
     error.value = null
     try {
       await documentService.delete(docId)
-      // بعد الحذف الناجح، أعد تحميل قائمة المستندات لنفس الشركة
-      await fetchDocuments(companyId)
+      await fetchDocuments(targetId, targetType)
     } catch (err) {
       error.value = 'Failed to delete document.'
-      console.error(err)
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  // --- Return public API ---
-  return {
-    documents,
-    loading,
-    error,
-    fetchDocuments,
-    createDocument,
-    deleteDocument,
-  }
+  return { documents, loading, error, fetchDocuments, createDocument, deleteDocument }
 })

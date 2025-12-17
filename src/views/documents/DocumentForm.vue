@@ -5,7 +5,6 @@
         رفع مستند جديد
       </h4>
 
-      <!-- حقل اسم المستند -->
       <AppInput
         id="document-name"
         label="اسم المستند"
@@ -14,7 +13,6 @@
         required
       />
 
-      <!-- حقل رفع الملف -->
       <div>
         <label
           for="document-file"
@@ -34,7 +32,6 @@
       </div>
     </div>
 
-    <!-- أزرار الإجراءات -->
     <div class="mt-6 flex justify-end space-x-3 space-x-reverse">
       <AppButton type="button" variant="secondary" @click="handleCancel"> إلغاء </AppButton>
       <AppButton type="submit" :disabled="isSaving || !form.file">
@@ -51,8 +48,14 @@ import AppInput from '@/components/ui/AppInput.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 
 const props = defineProps({
-  companyId: {
-    type: Number,
+  // تم التعديل هنا: استبدال companyId بـ targetId ودعم DECIMAL(18, 0) كـ String
+  targetId: {
+    type: [String, Number],
+    required: true,
+  },
+  // تم التعديل هنا: إضافة نوع الهدف (شركة أو مشروع)
+  targetType: {
+    type: String,
     required: true,
   },
   isSaving: {
@@ -63,33 +66,23 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel'])
 
-// دالة لإنشاء نموذج فارغ
+// دالة لإنشاء نموذج فارغ متوافق مع الحقول الجديدة في السيرفر
 const createFreshForm = () => ({
-  company_id: props.companyId,
+  target_id: props.targetId,
+  target_type: props.targetType,
   name: '',
-  file: null, // سيحتوي على كائن الملف
+  file: null,
 })
 
 const form = ref(createFreshForm())
 const fileError = ref(null)
 
-// دالة لمعالجة تغيير الملف
 const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (!file) {
     form.value.file = null
     return
   }
-
-  // يمكنك إضافة تحقق من حجم الملف هنا إذا أردت
-  // const maxSize = 5 * 1024 * 1024; // 5MB
-  // if (file.size > maxSize) {
-  //   fileError.value = 'حجم الملف كبير جداً (الحد الأقصى 5MB).';
-  //   form.value.file = null;
-  //   event.target.value = ''; // إعادة تعيين حقل الإدخال
-  //   return;
-  // }
-
   fileError.value = null
   form.value.file = file
 }
@@ -99,8 +92,7 @@ const handleSubmit = () => {
     fileError.value = 'الرجاء اختيار ملف أولاً.'
     return
   }
-  // لا حاجة لإنشاء FormData هنا، المكون الأب سيفعل ذلك
-  // لأن documentService يتوقع payload وليس FormData مباشرة
+  // إرسال كائن النموذج المحدث (target_id, target_type, name, file)
   emit('submit', form.value)
 }
 

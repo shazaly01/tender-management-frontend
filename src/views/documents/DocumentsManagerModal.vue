@@ -20,7 +20,9 @@
         >
           <div>
             <h3 class="text-lg font-semibold text-text-primary">إدارة المستندات</h3>
-            <p class="text-sm text-text-muted">للشركة: {{ company.name }}</p>
+            <p class="text-sm text-text-muted">
+              {{ targetType === 'company' ? 'للشركة' : 'للمشروع' }}: {{ owner.name }}
+            </p>
           </div>
           <button
             @click="closeModal"
@@ -39,7 +41,8 @@
 
         <div class="overflow-y-auto flex-grow">
           <DocumentForm
-            :company-id="company.id"
+            :target-id="owner.id"
+            :target-type="targetType"
             :is-saving="loading"
             @submit="handleUploadDocument"
             @cancel="closeModal"
@@ -156,7 +159,10 @@ import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
-  company: { type: Object, required: true },
+  // نغير المسمى ليكون عاماً (صاحب المستندات)
+  owner: { type: Object, required: true },
+  // نحدد النوع هنا (company أو project)
+  targetType: { type: String, required: true },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -168,8 +174,9 @@ const toast = useToast()
 watch(
   () => props.modelValue,
   (isOpen) => {
-    if (isOpen && props.company) {
-      documentStore.fetchDocuments(props.company.id).catch(() => {
+    if (isOpen && props.owner) {
+      // نمرر المعرف والنوع معاً للـ Store
+      documentStore.fetchDocuments(props.owner.id, props.targetType).catch(() => {
         toast.error('حدث خطأ أثناء جلب المستندات.')
       })
     }
@@ -198,7 +205,8 @@ const openDeleteDialog = (doc) => {
 const deleteSelectedDocument = async () => {
   if (!documentToDelete.value) return
   try {
-    await documentStore.deleteDocument(documentToDelete.value.id, props.company.id)
+    // نمرر المعرف والنوع لضمان تحديث القائمة بعد الحذف
+    await documentStore.deleteDocument(documentToDelete.value.id, props.owner.id, props.targetType)
     toast.success('تم حذف المستند بنجاح.')
   } catch (err) {
     toast.error('حدث خطأ أثناء الحذف.')

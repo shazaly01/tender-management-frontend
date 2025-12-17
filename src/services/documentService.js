@@ -4,25 +4,29 @@ import apiClient from './apiClient'
 const resource = '/documents'
 
 export default {
-  get(companyId) {
-    // ❌ الخطأ القديم: رابط غير موجود في الباك إند
-    // return apiClient.get(`/companies/${companyId}/documents`)
-
-    // ✅ التصحيح: طلب رابط المستندات مع تمرير company_id كفلتر
-    // سيتحول الرابط تلقائياً إلى: /api/documents?company_id=123
+  /**
+   * جلب المستندات بناءً على المعرف والنوع (شركة أو مشروع)
+   */
+  get(targetId, targetType) {
     return apiClient.get(resource, {
       params: {
-        company_id: companyId,
+        target_id: targetId, // المعرف DECIMAL(18, 0)
+        target_type: targetType, // 'company' أو 'project'
       },
     })
   },
 
+  /**
+   * رفع مستند جديد باستخدام FormData لدعم الملفات
+   */
   create(payload) {
-    // يجب إرسال البيانات كـ FormData
     const formData = new FormData()
-    formData.append('company_id', payload.company_id)
+
+    // إرسال البيانات الجديدة المتوافقة مع الـ Backend المحدث
+    formData.append('target_id', payload.target_id)
+    formData.append('target_type', payload.target_type)
     formData.append('name', payload.name)
-    // التأكد من أن الملف موجود قبل إضافته
+
     if (payload.file) {
       formData.append('file', payload.file)
     }
@@ -34,6 +38,9 @@ export default {
     })
   },
 
+  /**
+   * حذف مستند
+   */
   delete(id) {
     return apiClient.delete(`${resource}/${id}`)
   },
