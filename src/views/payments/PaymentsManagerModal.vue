@@ -110,12 +110,15 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { usePaymentStore } from '@/stores/paymentStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 import { formatCurrency } from '@/utils/formatters'
 
-// استيراد المكونات
+// Stores
+import { usePaymentStore } from '@/stores/paymentStore'
+import { useProjectStore } from '@/stores/projectStore'
+
+// Components
 import PaymentsList from './PaymentsList.vue'
 import PaymentForm from './PaymentForm.vue'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -128,50 +131,84 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+// تهيئة الـ Stores
 const paymentStore = usePaymentStore()
+// هنا نسترجع loading باسمه الأصلي لكي يعمل مع القالب القديم
 const { payments, pagination, loading, error } = storeToRefs(paymentStore)
+
+const projectStore = useProjectStore()
+const { currentProject } = storeToRefs(projectStore)
+
 const toast = useToast()
 
-// --- الخصائص المحسوبة لعرض الملخص المالي ---
+// === دمج بيانات المشروع (الأصلي + المحدث) ===
+const targetProject = computed(() => {
+  if (currentProject.value && currentProject.value.id === props.project?.id) {
+    return currentProject.value
+  }
+  return props.project
+})
+
+// --- الخصائص المحسوبة (تعتمد على targetProject) ---
 const totalProjectValue = computed(() => {
-  // استخدم optional chaining (?.) لتجنب الأخطاء إذا كان المشروع غير موجود
-  return formatCurrency(props.project?.contract_value || 0)
+  return formatCurrency(targetProject.value?.contract_value || 0)
 })
 
 const totalPaidAmount = computed(() => {
-  // نستخدم `total_payments` الجديدة القادمة من الـ API
-  return formatCurrency(props.project?.total_payments || 0)
+  return formatCurrency(targetProject.value?.total_payments || 0)
 })
 
 const remainingAmount = computed(() => {
-  const remaining = (props.project?.contract_value || 0) - (props.project?.total_payments || 0)
-  return formatCurrency(remaining)
+  const contract = Number(targetProject.value?.contract_value || 0)
+  const paid = Number(targetProject.value?.total_payments || 0)
+  return formatCurrency(contract - paid)
 })
 
 const isFormVisible = ref(false)
 const selectedPayment = ref(null)
 
 // --- دوال التحكم بالواجهة ---
+
 const handlePageChange = (page = 1) => {
-  if (!props.project) {
-    return
-  }
+  if (!props.project) return
+
+  // نستخدم loading الأصلي الخاص بالستور ليظهر السبينر في الجدول
   paymentStore.fetchPayments(page, { project_id: props.project.id }).catch(() => {
     toast.error('حدث خطأ أثناء جلب الدفعات.')
   })
 }
 
-// مراقبة فتح المودال لجلب البيانات
+const refreshProjectData = async () => {
+  if (props.project?.id) {
+    try {
+      await projectStore.fetchProject(props.project.id)
+    } catch (e) {
+      console.error('فشل تحديث بيانات المشروع', e)
+    }
+  }
+}
+
+// === [تصحيح] استعادة الـ Watcher القديم مع إضافة تحديث المشروع ===
 watch(
   () => props,
   (currentProps) => {
+    // التحقق من أن النافذة مفتوحة وأن المشروع موجود
     if (currentProps.modelValue && currentProps.project) {
+      // 1. جلب الدفعات (كما كان سابقاً)
       handlePageChange(1)
+
+      // 2. [الإضافة الجديدة] تحديث أرقام المشروع (المدفوع/المتبقي)
+      refreshProjectData()
+    } else if (!currentProps.modelValue) {
+      // تنظيف عند الإغلاق
+      isFormVisible.value = false
+      selectedPayment.value = null
+      currentProject.value = null
     }
   },
   {
-    deep: true,
-    immediate: true,
+    deep: true, // ضروري لمراقبة تغيرات الـ props الداخلية
+    immediate: true, // ضروري للعمل عند بدء التحميل مباشرة
   },
 )
 
@@ -190,7 +227,8 @@ const hideForm = () => {
   selectedPayment.value = null
 }
 
-// --- دوال معالجة البيانات (CRUD) ---
+// --- دوال المعالجة (CRUD) ---
+
 const handleSavePayment = async (formData) => {
   try {
     if (formData.id) {
@@ -200,11 +238,12 @@ const handleSavePayment = async (formData) => {
       await paymentStore.createPayment(formData)
       toast.success('تمت إضافة الدفعة بنجاح.')
     }
+
     hideForm()
-    // ملاحظة: بعد الحفظ، يجب أن نطلب من المكون الأب تحديث بيانات المشروع
-    // للحصول على `total_payments` المحدثة. هذا يتطلب إصدار حدث للأعلى.
-    // emit('project-updated'); // كمثال
+
+    // تحديث القوائم والأرقام
     await handlePageChange(pagination.value.current_page || 1)
+    await refreshProjectData()
   } catch (err) {
     toast.error(err.response?.data?.message || 'حدث خطأ أثناء حفظ الدفعة.')
   }
@@ -223,17 +262,20 @@ const deleteSelectedPayment = async () => {
   try {
     await paymentStore.deletePayment(paymentToDelete.value.id)
     toast.success('تم حذف الدفعة بنجاح.')
-    // أيضاً هنا، يجب تحديث بيانات المشروع في الأعلى
-    // emit('project-updated');
+
     if (payments.value.length === 1 && pagination.value.current_page > 1) {
       await handlePageChange(pagination.value.current_page - 1)
     } else {
       await handlePageChange(pagination.value.current_page)
     }
+
+    // تحديث الأرقام بعد الحذف
+    await refreshProjectData()
   } catch (err) {
     toast.error('حدث خطأ أثناء الحذف.')
   } finally {
     isDeleteDialogOpen.value = false
+    paymentToDelete.value = null
   }
 }
 
