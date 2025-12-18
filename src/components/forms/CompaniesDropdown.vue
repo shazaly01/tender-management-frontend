@@ -10,7 +10,7 @@
       :options="companies"
       :loading="loading"
       :required="required"
-      placeholder="اختر شركة (اختياري)"
+      placeholder="اختر شركة"
     />
 
     <p v-if="error" class="text-sm text-danger mt-1">{{ error }}</p>
