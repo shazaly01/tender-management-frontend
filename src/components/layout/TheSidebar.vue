@@ -132,6 +132,11 @@ const allNavLinks = shallowRef([
     icon: DocumentChartBarIcon,
     permission: 'company.view', // صلاحية عامة للتقارير
     children: [
+      {
+        name: 'ملخص الشركات',
+        routeName: 'CompaniesSummaryReport',
+        permission: 'company.view',
+      },
       { name: 'كشف حساب شركة', routeName: 'CompanyStatementReport', permission: 'company.view' },
     ],
   },

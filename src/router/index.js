@@ -20,6 +20,8 @@ const RolesList = () => import('@/views/roles/RolesList.vue')
 
 // --- استيراد صفحات التقارير ---
 const CompanyStatementReport = () => import('@/views/reports/CompanyStatementReport.vue')
+const CompaniesSummaryReport = () => import('@/views/reports/CompaniesSummaryReport.vue')
+const PrintSummary = () => import('@/views/reports/PrintSummary.vue')
 
 const routes = [
   // --- المسارات العامة (لا تتطلب مصادقة) ---
@@ -79,6 +81,12 @@ const routes = [
 
       // --- مسارات التقارير ---
       {
+        path: 'reports/companies-summary', // المسار الجديد
+        name: 'CompaniesSummaryReport',
+        component: CompaniesSummaryReport,
+        meta: { permission: 'company.view' },
+      },
+      {
         path: 'reports/company-statement',
         name: 'CompanyStatementReport',
         component: CompanyStatementReport,
@@ -90,6 +98,12 @@ const routes = [
     ],
   },
 
+  {
+    path: '/print/companies-summary',
+    name: 'PrintSummary',
+    component: PrintSummary,
+    meta: { requiresAuth: true }, // لضمان أمان البيانات
+  },
   // مسار للتعامل مع الصفحات غير الموجودة (يبقى كما هو)
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]

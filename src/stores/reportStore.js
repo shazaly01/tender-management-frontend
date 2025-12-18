@@ -1,4 +1,3 @@
-// src/stores/reportStore.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import reportService from '@/services/reportService'
@@ -7,10 +6,31 @@ export const useReportStore = defineStore('report', () => {
   // --- State ---
   const dashboardStats = ref(null)
   const companyStatement = ref(null)
+  const companiesSummary = ref([]) // [جديد] حالة التقرير العام
+  const grandSummary = ref(null) // [جديد] حالة الإجماليات النهائية
   const loading = ref(false)
   const error = ref(null)
 
   // --- Actions ---
+
+  // [جديد] أكشن جلب التقرير العام
+  async function fetchCompaniesSummary() {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await reportService.getCompaniesSummary()
+      // تخزين البيانات الرئيسية (قائمة الشركات)
+      companiesSummary.value = response.data.data
+      // تخزين ملخص الإجماليات (Grand Summary)
+      grandSummary.value = response.data.grand_summary
+    } catch (err) {
+      error.value = 'Failed to fetch companies summary report.'
+      console.error(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function fetchDashboardStats() {
     loading.value = true
     error.value = null
@@ -28,7 +48,7 @@ export const useReportStore = defineStore('report', () => {
   async function fetchCompanyStatement(companyId) {
     loading.value = true
     error.value = null
-    companyStatement.value = null // أفرغ التقرير القديم قبل جلب الجديد
+    companyStatement.value = null
     try {
       const response = await reportService.getCompanyStatement(companyId)
       companyStatement.value = response.data.data
@@ -44,9 +64,12 @@ export const useReportStore = defineStore('report', () => {
   return {
     dashboardStats,
     companyStatement,
+    companiesSummary, // تصدير الحالة الجديدة
+    grandSummary, // تصدير الإجماليات
     loading,
     error,
     fetchDashboardStats,
     fetchCompanyStatement,
+    fetchCompaniesSummary, // تصدير الأكشن الجديد
   }
 })
