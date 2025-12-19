@@ -34,9 +34,9 @@
 
       <AppInput
         id="company-owner-name"
-        label="اسم المالك"
+        label="رئيس مجلس الادارة"
         v-model="form.owner_name"
-        placeholder="ادخل اسم المالك"
+        placeholder="ادخل الاسم "
       />
       <AppInput
         id="company-address"

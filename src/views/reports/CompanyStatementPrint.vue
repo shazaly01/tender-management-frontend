@@ -29,7 +29,7 @@
           </p>
         </div>
         <div>
-          <p class="text-xs text-gray-500 font-bold uppercase mb-1">اسم المالك</p>
+          <p class="text-xs text-gray-500 font-bold uppercase mb-1">رئيس مجلس الادارة</p>
           <p class="text-lg font-bold text-gray-800">{{ reportData.company.owner_name || '-' }}</p>
         </div>
       </div>

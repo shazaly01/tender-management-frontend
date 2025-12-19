@@ -43,7 +43,7 @@
         <!-- تم إضافة Optional Chaining (?.) كحماية إضافية -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-text-secondary">
           <p><strong>الرقم الضريبي:</strong> {{ reportData.company?.tax_number || 'N/A' }}</p>
-          <p><strong>اسم المالك:</strong> {{ reportData.company?.owner_name || 'N/A' }}</p>
+          <p><strong>رئيس نجلس الادارة:</strong> {{ reportData.company?.owner_name || 'N/A' }}</p>
           <p><strong>العنوان:</strong> {{ reportData.company?.address || 'غير محدد' }}</p>
         </div>
       </div>
