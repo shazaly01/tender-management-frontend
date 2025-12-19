@@ -6,6 +6,14 @@
     <!-- رأس الصفحة -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-text-primary">تقرير كشف حساب شركة</h1>
+      <AppButton
+        v-if="reportData"
+        @click="handlePrint"
+        class="bg-indigo-500 hover:bg-indigo-600 text-white"
+      >
+        <PrinterIcon class="w-5 h-5 ml-2" />
+        طباعة احترافية
+      </AppButton>
     </div>
 
     <!-- منطقة الفلترة -->
@@ -107,6 +115,9 @@
 <script setup>
 // --- (جزء الـ <script> يبقى كما هو تماماً، لا حاجة لتغييره) ---
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { PrinterIcon } from '@heroicons/vue/24/outline'
+import AppButton from '@/components/ui/AppButton.vue'
 import reportService from '@/services/reportService'
 import { useToast } from 'vue-toastification'
 
@@ -118,6 +129,7 @@ import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
 import { formatCurrency, formatDate } from '@/utils/formatters'
 
 const toast = useToast()
+const router = useRouter()
 
 const selectedCompanyId = ref(null)
 const reportData = ref(null)
@@ -144,5 +156,14 @@ async function fetchReport() {
   } finally {
     loading.value = false
   }
+}
+
+const handlePrint = () => {
+  if (!reportData.value) return
+
+  sessionStorage.setItem('printStatementData', JSON.stringify(reportData.value))
+
+  const routeData = router.resolve({ name: 'PrintCompanyStatement' })
+  window.open(routeData.href, '_blank')
 }
 </script>

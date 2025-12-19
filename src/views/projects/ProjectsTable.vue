@@ -8,6 +8,9 @@
       :row-clickable="true"
       @row-click="$emit('row-clicked', $event)"
     >
+      <template #cell-project_owner="{ item }">
+        <span class="text-text-muted font-medium">{{ item.project_owner || 'غير محدد' }}</span>
+      </template>
       <!-- عرض اسم الشركة -->
       <template #cell-company="{ item }">
         <span>{{ item.company?.name || 'N/A' }}</span>
@@ -124,6 +127,7 @@ const tableHeaders = computed(() => {
   const headers = [
     { key: 'id', label: '#' },
     { key: 'name', label: 'اسم المشروع' },
+    { key: 'project_owner', label: 'الجهة المالكة' },
     { key: 'company', label: 'الشركة' },
     { key: 'contract_value', label: 'قيمة العقد' },
     { key: 'award_date', label: 'تاريخ الترسية' },

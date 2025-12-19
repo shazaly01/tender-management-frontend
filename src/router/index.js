@@ -104,6 +104,12 @@ const routes = [
     component: PrintSummary,
     meta: { requiresAuth: true }, // لضمان أمان البيانات
   },
+  {
+    path: '/print/company-statement',
+    name: 'PrintCompanyStatement',
+    component: () => import('@/views/reports/CompanyStatementPrint.vue'),
+    meta: { requiresAuth: true },
+  },
   // مسار للتعامل مع الصفحات غير الموجودة (يبقى كما هو)
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]

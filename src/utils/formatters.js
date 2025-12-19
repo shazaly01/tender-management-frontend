@@ -1,40 +1,50 @@
-// src/utils/formatters.js
+/**
+ * ملف أدوات التنسيق (Formatters)
+ */
 
 /**
- * يقوم بتنسيق القيمة الرقمية كعملة بالدينار الليبي (LYD) مع أرقام إنجليزية.
- * يعرض الكسور العشرية فقط إذا كانت موجودة.
- * @param {number | null | undefined} value - القيمة الرقمية المراد تنسيقها.
- * @returns {string} - السلسلة المنسقة، مثال: "LYD 1,500" أو "LYD 1,500.55" أو "N/A".
+ * يقوم بتنسيق القيمة الرقمية وإضافة "د.ل" يدوياً.
+ * @param {number | string | null | undefined} value - القيمة الرقمية.
+ * @returns {string} - السلسلة المنسقة، مثال: "1,500 د.ل"
  */
 export function formatCurrency(value) {
-  if (value === null || value === undefined) return 'N/A'
+  // التحقق من القيم الفارغة
+  if (value === null || value === undefined || value === '') {
+    return 'N/A'
+  }
 
-  // === [التعديل هنا] ===
-  // الخيارات الأساسية
+  // تحويل القيمة إلى رقم لضمان عمل الدالة حتى لو جاءت القيمة كنص من السيرفر
+  const numValue = Number(value)
+
+  // إذا لم يكن رقماً صحيحاً (NaN)، نعيد القيمة كما هي أو صفر
+  if (isNaN(numValue)) {
+    return '0 د.ل'
+  }
+
+  // إعدادات التنسيق (أرقام إنجليزية، فواصل آلاف)
   const options = {
-    style: 'currency',
-    currency: 'LYD',
-    // لا نحدد minimumFractionDigits هنا
-    // نحدد الحد الأقصى للكسور العشرية
+    style: 'decimal',
     maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
   }
 
-  // إذا كان الرقم صحيحاً (لا يحتوي على كسور عشرية)،
-  // قم بتعيين الحد الأقصى للكسور إلى 0 لإزالة الأصفار غير الضرورية.
-  // نستخدم (value % 1 !== 0) للتحقق من وجود كسر.
-  if (value % 1 === 0) {
+  // إزالة الكسور إذا كان الرقم صحيحاً (بدون فكة)
+  if (numValue % 1 === 0) {
     options.maximumFractionDigits = 0
+    options.minimumFractionDigits = 0
   }
-  // === [نهاية التعديل] ===
 
-  // 'en-US' لضمان الأرقام الإنجليزية.
-  return new Intl.NumberFormat('en-US', options).format(value)
+  // التنسيق باستخدام مكتبة المتصفح القياسية
+  const formattedNumber = new Intl.NumberFormat('en-US', options).format(numValue)
+
+  // إرجاع الرقم مع رمز العملة
+  return `${formattedNumber} د.ل`
 }
 
 /**
  * يقوم بتنسيق سلسلة التاريخ إلى صيغة ميلادية رقمية (يوم/شهر/سنة).
- * @param {string | null | undefined} dateString - سلسلة التاريخ القادمة من الـ API.
- * @returns {string} - السلسلة المنسقة، مثال: "16/12/2025" أو "N/A".
+ * @param {string | null | undefined} dateString - سلسلة التاريخ.
+ * @returns {string} - السلسلة المنسقة.
  */
 export function formatDate(dateString) {
   if (!dateString) return 'N/A'

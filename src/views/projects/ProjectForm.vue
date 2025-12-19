@@ -9,6 +9,13 @@
         required
       />
 
+      <AppInput
+        id="project-owner"
+        label="الجهة المالكة للمشروع"
+        v-model="form.project_owner"
+        placeholder="مثال: وزارة الإسكان، هيئة المشروعات..."
+      />
+
       <CompaniesDropdown
         id="project-company"
         label="الشركة التابع لها المشروع"
@@ -86,6 +93,7 @@ const errors = reactive({
 const createFreshForm = () => ({
   id: null,
   name: '',
+  project_owner: '',
   company_id: '',
   contract_value: '',
   award_date: '',
@@ -105,7 +113,8 @@ watch(
       form.value = {
         id: newData.id,
         name: newData.name,
-        company_id: newData.company_id, // DECIMAL(18, 0) سيعامل كـ String أو Number
+        project_owner: newData.project_owner || '',
+        company_id: Number(newData.company_id || newData.company?.id),
         contract_value: newData.contract_value,
         award_date: formattedDate,
         description: newData.description || '',

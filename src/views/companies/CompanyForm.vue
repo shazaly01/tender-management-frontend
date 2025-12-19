@@ -16,6 +16,13 @@
         placeholder="ادخل الرقم الضريبي"
       />
 
+      <AppInput
+        id="company-commercial-record"
+        label="رقم السجل التجاري"
+        v-model="form.commercial_record"
+        placeholder="ادخل رقم السجل التجاري"
+      />
+
       <!-- === [تمت الإضافة هنا] === -->
       <AppInput
         id="company-license-number"
@@ -71,6 +78,7 @@ const createFreshForm = () => ({
   id: null,
   name: '',
   tax_number: '',
+  commercial_record: '',
   license_number: '', // تمت إضافة الحقل الجديد
   owner_name: '',
   address: '',
@@ -88,6 +96,7 @@ watch(
         id: newData.id,
         name: newData.name,
         tax_number: newData.tax_number,
+        commercial_record: newData.commercial_record || '',
         license_number: newData.license_number || '', // تمت إضافة الحقل الجديد
         owner_name: newData.owner_name,
         address: newData.address,

@@ -35,6 +35,11 @@
       </div>
 
       <AppTable :headers="tableHeaders" :items="companies" :is-loading="loading">
+        <template #cell-commercial_record="{ item }">
+          <span class="text-text-muted font-medium">{{
+            item.commercial_record || 'غير محدد'
+          }}</span>
+        </template>
         <template #cell-actions="{ item }">
           <div class="flex items-center space-x-2 space-x-reverse">
             <button
@@ -138,6 +143,7 @@ const tableHeaders = computed(() => {
   const headers = [
     { key: 'id', label: '#' },
     { key: 'name', label: 'اسم الشركة' },
+    { key: 'commercial_record', label: 'رقم السجل التجاري' },
     { key: 'tax_number', label: 'الرقم الضريبي' },
     { key: 'license_number', label: 'رقم الرخصة' },
     { key: 'owner_name', label: 'اسم المالك' },
