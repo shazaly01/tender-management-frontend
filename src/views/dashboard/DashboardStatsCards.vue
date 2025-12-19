@@ -66,12 +66,15 @@ defineProps({
 // --- [تعديل 2]: إضافة دالة لتنسيق العملة ---
 function formatCurrency(value) {
   if (value === null || value === undefined) return 'N/A'
-  // تحويل الرقم إلى عملة مع فاصل الآلاف وبدون أرقام عشرية
-  return new Intl.NumberFormat('ar-SA', {
-    style: 'currency',
-    currency: 'SAR', // يمكنك تغيير العملة هنا
+
+  // 1. تنسيق الرقم فقط مع فواصل الآلاف وبدون أرقام عشرية
+  const numberPart = new Intl.NumberFormat('en-US', {
+    // 'ar-EG' يعطي فواصل آلاف عربية جيدة
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value)
+
+  // 2. إضافة الرمز يدويًا مع مسافة قبله
+  return `${numberPart} د.ل`
 }
 </script>
