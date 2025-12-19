@@ -125,6 +125,7 @@ const allNavLinks = shallowRef([
     children: [
       { name: 'المستخدمون', routeName: 'UsersList', permission: 'user.view' },
       { name: 'الأدوار والصلاحيات', routeName: 'RolesList', permission: 'role.view' },
+      { name: 'النسخ الاحتياطي', routeName: 'BackupsList', permission: 'backup.view' },
     ],
   },
   {
