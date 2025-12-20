@@ -22,6 +22,7 @@
         </label>
         <input
           id="document-file"
+          ref="fileInput"
           type="file"
           @change="handleFileChange"
           required
@@ -80,6 +81,15 @@ const createFreshForm = () => ({
 
 const form = ref(createFreshForm())
 const fileError = ref(null)
+const fileInput = ref(null)
+
+const resetForm = () => {
+  form.value = createFreshForm() // تصفير الحقول النصية
+  fileError.value = null // مسح أخطاء التحقق
+  if (fileInput.value) {
+    fileInput.value.value = '' // تصفير اسم الملف الظاهر في المتصفح
+  }
+}
 
 const handleFileChange = (event) => {
   const file = event.target.files[0]
@@ -113,4 +123,6 @@ const handleSubmit = () => {
 const handleCancel = () => {
   emit('cancel')
 }
+
+defineExpose({ resetForm })
 </script>

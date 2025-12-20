@@ -41,6 +41,7 @@
 
         <div class="overflow-y-auto flex-grow">
           <DocumentForm
+            ref="documentFormRef"
             :target-id="owner.id"
             :target-type="targetType"
             :is-saving="loading"
@@ -170,6 +171,7 @@ const emit = defineEmits(['update:modelValue'])
 const documentStore = useDocumentStore()
 const { documents, loading, error } = storeToRefs(documentStore)
 const toast = useToast()
+const documentFormRef = ref(null)
 
 watch(
   () => props.modelValue,
@@ -188,6 +190,10 @@ const handleUploadDocument = async (formData) => {
   try {
     await documentStore.createDocument(formData)
     toast.success(`تم رفع مستند '${formData.name}' بنجاح.`)
+
+    if (documentFormRef.value) {
+      documentFormRef.value.resetForm()
+    }
   } catch (err) {
     let errorMessage = 'حدث خطأ غير متوقع أثناء رفع المستند.'
 
