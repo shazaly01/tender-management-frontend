@@ -53,10 +53,16 @@
         <h3 class="text-lg font-semibold mb-4">ملخص مالي</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
-            <p class="text-sm text-text-muted">إجمالي قيمة العقود</p>
+            <p class="text-sm text-text-muted">إجمالي العقود الكلية</p>
+            <p class="text-2xl font-bold text-gray-500">
+              {{ formatCurrency(reportData.summary?.total_contract_value || 0) }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-text-muted">إجمالي القيمة المستحقة</p>
             <p class="text-2xl font-bold text-primary">
-              <!-- تم استخدام ?. للحماية -->
-              {{ formatCurrency(reportData.summary?.total_contracts_value || 0) }}
+              {{ formatCurrency(reportData.summary?.total_due_value || 0) }}
             </p>
           </div>
           <div>
@@ -86,14 +92,18 @@
         <div
           v-for="project in reportData.projects"
           :key="project.id"
-          class="border border-surface-border rounded-lg p-4 grid grid-cols-4 gap-4 items-center"
+          class="border border-surface-border rounded-lg p-4 grid grid-cols-5 gap-4 items-center"
         >
           <div class="col-span-2">
             <h4 class="font-semibold">مشروع: {{ project.name }}</h4>
           </div>
           <div>
             <p class="text-sm text-text-muted">قيمة العقد</p>
-            <p class="font-bold">{{ formatCurrency(project.contract_value) }}</p>
+            <p class="font-bold text-gray-500">{{ formatCurrency(project.contract_value) }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-text-muted">القيمة المستحقة</p>
+            <p class="font-bold">{{ formatCurrency(project.due_value) }}</p>
           </div>
           <div>
             <p class="text-sm text-text-muted">إجمالي المدفوع</p>

@@ -24,7 +24,7 @@
       />
       <StatCard
         title="قيمة العقود الإجمالية"
-        :value="formatCurrency(stats.total_contracts_value)"
+        :value="formatCurrency(stats.total_due_value)"
         :icon="BanknotesIcon"
         icon-bg-color="bg-green-500/20"
         icon-color="text-green-400"

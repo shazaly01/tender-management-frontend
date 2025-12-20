@@ -42,9 +42,11 @@
         <!-- ملخص الحسابات المالية للمشروع -->
         <div v-if="project" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
           <div class="bg-surface-ground p-3 rounded-md">
-            <p class="text-sm text-text-muted">قيمة العقد</p>
+            <p class="text-sm text-text-muted">القيمة المستحقة</p>
+            <!-- تغيير النص هنا -->
             <p class="text-lg font-bold text-primary">{{ totalProjectValue }}</p>
           </div>
+
           <div class="bg-surface-ground p-3 rounded-md">
             <p class="text-sm text-text-muted">إجمالي المدفوع</p>
             <p class="text-lg font-bold text-success">{{ totalPaidAmount }}</p>
@@ -151,7 +153,7 @@ const targetProject = computed(() => {
 
 // --- الخصائص المحسوبة (تعتمد على targetProject) ---
 const totalProjectValue = computed(() => {
-  return formatCurrency(targetProject.value?.contract_value || 0)
+  return formatCurrency(targetProject.value?.due_value || 0)
 })
 
 const totalPaidAmount = computed(() => {
@@ -159,7 +161,7 @@ const totalPaidAmount = computed(() => {
 })
 
 const remainingAmount = computed(() => {
-  const contract = Number(targetProject.value?.contract_value || 0)
+  const contract = Number(targetProject.value?.due_value || 0)
   const paid = Number(targetProject.value?.total_payments || 0)
   return formatCurrency(contract - paid)
 })

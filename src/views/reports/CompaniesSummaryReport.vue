@@ -25,13 +25,26 @@
 
     <div v-if="grandSummary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <AppCard
+        class="relative overflow-hidden p-5 border-r-4 border-r-gray-500 bg-surface-section/60 shadow-[0_4_20px_rgba(0,0,0,0.3)]"
+      >
+        <div class="text-xs text-gray-400/60 uppercase tracking-widest mb-2 font-bold">
+          إجمالي العقود الكلية
+        </div>
+        <div class="text-2xl font-black text-gray-300 drop-shadow-[0_0_8px_rgba(209,213,219,0.8)]">
+          {{ formatCurrency(grandSummary.grand_total_contract_value) }}
+        </div>
+      </AppCard>
+
+      <AppCard
         class="relative overflow-hidden p-5 border-r-4 border-r-cyan-400 bg-surface-section/60 shadow-[0_4_20px_rgba(0,0,0,0.3)]"
       >
         <div class="text-xs text-cyan-200/60 uppercase tracking-widest mb-2 font-bold">
-          إجمالي قيمة العقود
+          إجمالي القيمة المستحقة
+          <!-- 1. تم تغيير النص هنا -->
         </div>
         <div class="text-2xl font-black text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
-          {{ formatCurrency(grandSummary.grand_total_value) }}
+          {{ formatCurrency(grandSummary.grand_total_due_value) }}
+          <!-- 2. تم تغيير المفتاح هنا -->
         </div>
       </AppCard>
 
@@ -84,10 +97,14 @@
           </span>
         </template>
 
-        <template #cell-total_contracts_value="{ item }">
-          <span class="text-gray-100 font-medium">{{
-            formatCurrency(item.total_contracts_value)
+        <template #cell-total_contract_value="{ item }">
+          <span class="text-gray-400 font-medium">{{
+            formatCurrency(item.total_contract_value)
           }}</span>
+        </template>
+
+        <template #cell-total_due_value="{ item }">
+          <span class="text-gray-100 font-medium">{{ formatCurrency(item.total_due_value) }}</span>
         </template>
 
         <template #cell-total_paid="{ item }">
@@ -131,7 +148,8 @@ const tableHeaders = [
   { key: 'name', label: 'الشركة' },
   { key: 'license_number', label: 'رقم الرخصة' },
   { key: 'projects_count', label: 'المشاريع' },
-  { key: 'total_contracts_value', label: 'قيمة العقود' },
+  { key: 'total_contract_value', label: 'قيمة العقود الكلية' },
+  { key: 'total_due_value', label: 'القيمة المستحقة' },
   { key: 'total_paid', label: 'المدفوع' },
   { key: 'total_remaining', label: 'المتبقي' },
 ]

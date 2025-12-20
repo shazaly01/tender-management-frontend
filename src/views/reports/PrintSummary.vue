@@ -20,9 +20,20 @@
       <div
         class="border-2 border-gray-100 p-4 rounded-lg bg-gray-50/50 flex flex-col justify-center"
       >
-        <p class="text-gray-500 text-xs font-bold mb-1 uppercase">إجمالي قيمة العقود</p>
+        <p class="text-gray-500 text-xs font-bold mb-1 uppercase">إجمالي العقود الكلية</p>
+        <p class="text-2xl font-black text-gray-700">
+          {{ formatCurrency(grandSummary?.grand_total_contract_value) }}
+        </p>
+      </div>
+
+      <div
+        class="border-2 border-gray-100 p-4 rounded-lg bg-gray-50/50 flex flex-col justify-center"
+      >
+        <p class="text-gray-500 text-xs font-bold mb-1 uppercase">إجمالي القيمة المستحقة</p>
+        <!-- 1. تغيير النص -->
         <p class="text-2xl font-black text-black">
-          {{ formatCurrency(grandSummary?.grand_total_value) }}
+          {{ formatCurrency(grandSummary?.grand_total_due_value) }}
+          <!-- 2. تغيير المفتاح -->
         </p>
       </div>
 
@@ -62,7 +73,8 @@
             <th class="p-3 border border-gray-800 min-w-[250px]">اسم الشركة</th>
             <th class="p-3 border border-gray-800 w-40">رقم الرخصة</th>
             <th class="p-3 border border-gray-800 w-24 text-center">المشاريع</th>
-            <th class="p-3 border border-gray-800 w-48 font-bold">قيمة العقود</th>
+            <th class="p-3 border border-gray-800 w-48 font-bold">قيمة العقد</th>
+            <th class="p-3 border border-gray-800 w-48 font-bold">القيمة المستحقة</th>
             <th class="p-3 border border-gray-800 w-48 font-bold">المدفوع</th>
             <th class="p-3 border border-gray-800 w-48 font-bold">المتبقي</th>
           </tr>
@@ -75,8 +87,12 @@
             <td class="p-3 border border-gray-300 text-center font-bold">
               {{ item.projects_count }}
             </td>
+            <td class="p-3 border border-gray-300 text-gray-600">
+              {{ formatCurrency(item.total_contract_value) }}
+            </td>
+
             <td class="p-3 border border-gray-300">
-              {{ formatCurrency(item.total_contracts_value) }}
+              {{ formatCurrency(item.total_due_value) }}
             </td>
             <td class="p-3 border border-gray-300 text-emerald-800 font-bold">
               {{ formatCurrency(item.total_paid) }}

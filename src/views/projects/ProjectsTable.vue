@@ -16,9 +16,14 @@
         <span>{{ item.company?.name || 'N/A' }}</span>
       </template>
 
-      <!-- تنسيق قيمة العقد -->
+      <!-- تنسيق قيمة العقد الكلية -->
       <template #cell-contract_value="{ item }">
-        <span>{{ formatCurrency(item.contract_value) }}</span>
+        <span class="text-gray-400">{{ formatCurrency(item.contract_value) }}</span>
+      </template>
+
+      <!-- تنسيق قيمة العقد -->
+      <template #cell-due_value="{ item }">
+        <span>{{ formatCurrency(item.due_value) }}</span>
       </template>
 
       <!-- تنسيق التاريخ -->
@@ -130,6 +135,7 @@ const tableHeaders = computed(() => {
     { key: 'project_owner', label: 'الجهة المالكة' },
     { key: 'company', label: 'الشركة' },
     { key: 'contract_value', label: 'قيمة العقد' },
+    { key: 'due_value', label: 'القيمة المستحقة' },
     { key: 'award_date', label: 'تاريخ الترسية' },
   ]
   if (

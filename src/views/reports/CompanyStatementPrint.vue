@@ -37,9 +37,18 @@
 
     <div class="grid grid-cols-4 gap-4 mb-8">
       <div class="border-2 border-gray-100 p-4 rounded-lg flex flex-col justify-center">
-        <p class="text-gray-500 text-xs font-bold mb-1 uppercase">إجمالي قيمة العقود</p>
+        <p class="text-gray-500 text-xs font-bold mb-1 uppercase">إجمالي العقود الكلية</p>
+        <p class="text-2xl font-black text-gray-700">
+          {{ formatCurrency(reportData?.summary?.total_contract_value || 0) }}
+        </p>
+      </div>
+
+      <div class="border-2 border-gray-100 p-4 rounded-lg flex flex-col justify-center">
+        <p class="text-gray-500 text-xs font-bold mb-1 uppercase">إجمالي القيمة المستحقة</p>
+        <!-- 1. تغيير النص -->
         <p class="text-2xl font-black text-black">
-          {{ formatCurrency(reportData?.summary?.total_contracts_value || 0) }}
+          {{ formatCurrency(reportData?.summary?.total_due_value || 0) }}
+          <!-- 2. تغيير المفتاح -->
         </p>
       </div>
 
@@ -73,6 +82,7 @@
             <th class="p-3 border border-gray-800 w-12 text-center">#</th>
             <th class="p-3 border border-gray-800">اسم المشروع</th>
             <th class="p-3 border border-gray-800 w-48 font-bold">قيمة العقد</th>
+            <th class="p-3 border border-gray-800 w-48 font-bold">القيمة المستحقة</th>
             <th class="p-3 border border-gray-800 w-48 font-bold">إجمالي المدفوع</th>
             <th class="p-3 border border-gray-800 w-48 font-bold">المتبقي</th>
           </tr>
@@ -85,14 +95,19 @@
           >
             <td class="p-3 border border-gray-300 text-center font-bold">{{ index + 1 }}</td>
             <td class="p-3 border border-gray-300 font-bold text-base">{{ project.name }}</td>
-            <td class="p-3 border border-gray-300">
+
+            <td class="p-3 border border-gray-300 text-gray-600">
               {{ formatCurrency(project.contract_value) }}
+            </td>
+
+            <td class="p-3 border border-gray-300">
+              {{ formatCurrency(project.due_value) }}
             </td>
             <td class="p-3 border border-gray-300 text-emerald-800 font-bold">
               {{ formatCurrency(project.total_paid) }}
             </td>
             <td class="p-3 border border-gray-300 font-black text-rose-800">
-              {{ formatCurrency(project.contract_value - project.total_paid) }}
+              {{ formatCurrency(project.due_value - project.total_paid) }}
             </td>
           </tr>
 

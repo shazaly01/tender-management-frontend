@@ -28,11 +28,20 @@
 
       <AppInput
         id="project-contract-value"
-        label="قيمة العقد"
+        label="قيمة العقد الكلية"
         v-model="form.contract_value"
         type="number"
         step="0.01"
-        placeholder="ادخل قيمة العقد الكلية"
+        placeholder="ادخل قيمة العقد الإجمالية"
+      />
+
+      <AppInput
+        id="project-due-value"
+        label="القيمة المستحقة"
+        v-model="form.due_value"
+        type="number"
+        step="0.01"
+        placeholder="ادخل القيمة المستحقة الكلية"
         required
       />
 
@@ -96,6 +105,7 @@ const createFreshForm = () => ({
   project_owner: '',
   company_id: '',
   contract_value: '',
+  due_value: '',
   award_date: '',
   description: '',
 })
@@ -116,6 +126,7 @@ watch(
         project_owner: newData.project_owner || '',
         company_id: Number(newData.company_id || newData.company?.id),
         contract_value: newData.contract_value,
+        due_value: newData.due_value,
         award_date: formattedDate,
         description: newData.description || '',
       }
