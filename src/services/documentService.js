@@ -10,8 +10,8 @@ export default {
   get(targetId, targetType) {
     return apiClient.get(resource, {
       params: {
-        target_id: targetId, // المعرف DECIMAL(18, 0)
-        target_type: targetType, // 'company' أو 'project'
+        target_id: targetId,
+        target_type: targetType,
       },
     })
   },

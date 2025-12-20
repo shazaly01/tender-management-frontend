@@ -77,7 +77,7 @@ export const useProjectStore = defineStore('project', () => {
     try {
       await projectService.delete(id)
     } catch (err) {
-      error.value = 'Failed to delete project.'
+      error.value = err.response?.data?.message || 'Failed to delete project.'
       console.error(err)
       throw err
     } finally {

@@ -189,7 +189,38 @@ const handleUploadDocument = async (formData) => {
     await documentStore.createDocument(formData)
     toast.success(`تم رفع مستند '${formData.name}' بنجاح.`)
   } catch (err) {
-    toast.error(err.response?.data?.message || 'حدث خطأ أثناء رفع المستند.')
+    let errorMessage = 'حدث خطأ غير متوقع أثناء رفع المستند.'
+
+    if (err.response) {
+      const status = err.response.status
+
+      // 1. خطأ تجاوز حجم السيرفر (قبل وصول الملف للارافيل)
+      if (status === 413) {
+        errorMessage =
+          'حجم الملف كبير جداً! السيرفر يرفض استلام ملفات بهذا الحجم (يرجى مراجعة php.ini).'
+      }
+
+      // 2. خطأ التحقق من البيانات (الرسائل المعربة التي وضعناها في StoreDocumentRequest)
+      else if (status === 422) {
+        // فحص وجود أخطاء محددة لحقل الملف
+        const validationErrors = err.response.data?.errors
+        if (validationErrors && validationErrors.file) {
+          // جلب الرسالة المعربة: "حجم الملف كبير جداً (أكبر من 50 ميغا)..."
+          errorMessage = validationErrors.file[0]
+        } else {
+          errorMessage = err.response.data?.message || 'بيانات الملف غير صالحة.'
+        }
+      }
+
+      // 3. أي رسالة خطأ أخرى مرسلة من السيرفر
+      else if (err.response.data?.message) {
+        errorMessage = err.response.data.message
+      }
+    } else if (err.message.includes('Network Error')) {
+      errorMessage = 'فشل الاتصال: قد يكون حجم الملف كبيراً جداً وانقطع الاتصال قبل اكتماله.'
+    }
+
+    toast.error(errorMessage)
   }
 }
 

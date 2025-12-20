@@ -156,13 +156,17 @@ const deleteSelectedProject = async () => {
     try {
       await projectStore.deleteProject(projectToDelete.value.id)
       toast.success(`تم حذف مشروع '${projectToDelete.value.name}' بنجاح.`)
+
       if (projects.value.length === 1 && pagination.value.current_page > 1) {
         await handlePageChange(pagination.value.current_page - 1)
       } else {
         await handlePageChange(pagination.value.current_page)
       }
     } catch (error) {
-      toast.error('حدث خطأ أثناء محاولة الحذف.')
+      // --- التعديل هنا (الحل السحري) ---
+      // عرض رسالة الخطأ القادمة من الباك-إند (مثل: وجود دفعات أو مستندات)
+      const errorMessage = projectStore.error || error.response?.data?.message || 'فشل حذف المشروع.'
+      toast.error(errorMessage)
     } finally {
       isDeleteDialogOpen.value = false
       projectToDelete.value = null

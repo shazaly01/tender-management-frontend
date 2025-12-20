@@ -79,7 +79,7 @@ export const useCompanyStore = defineStore('company', () => {
     try {
       await companyService.delete(id)
     } catch (err) {
-      error.value = 'Failed to delete company.'
+      error.value = err.response?.data?.message || 'Failed to delete company.'
       console.error(err)
       throw err
     } finally {

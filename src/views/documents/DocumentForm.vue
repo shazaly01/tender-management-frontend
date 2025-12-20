@@ -18,17 +18,20 @@
           for="document-file"
           class="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1"
         >
-          ملف المستند (PDF, JPG, PNG)
+          ملف المستند (PDF, صور, فيديو حتى 50 ميجا)
         </label>
         <input
           id="document-file"
           type="file"
           @change="handleFileChange"
           required
-          class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-surface-ground dark:border-surface-border dark:placeholder-gray-400"
-          accept=".pdf,.jpg,.jpeg,.png"
+          class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-surface-ground dark:border-surface-border"
+          accept=".pdf,.jpg,.jpeg,.png,.mp4,.mov"
         />
-        <p v-if="fileError" class="text-sm text-danger mt-1">{{ fileError }}</p>
+
+        <p v-if="fileError || serverError" class="text-sm text-red-500 mt-1 font-medium">
+          {{ fileError || serverError }}
+        </p>
       </div>
     </div>
 
@@ -62,6 +65,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  serverError: { type: String, default: null },
 })
 
 const emit = defineEmits(['submit', 'cancel'])
@@ -83,6 +87,16 @@ const handleFileChange = (event) => {
     form.value.file = null
     return
   }
+
+  // التحديث 4: تحقق أولي سريع في الواجهة الأمامية قبل الرفع
+  const maxSize = 50 * 1024 * 1024 // 50MB
+  if (file.size > maxSize) {
+    fileError.value = 'حجم الملف يتجاوز 50 ميجابايت، يرجى اختيار ملف أصغر.'
+    form.value.file = null
+    event.target.value = '' // تفريغ الحقل
+    return
+  }
+
   fileError.value = null
   form.value.file = file
 }

@@ -219,13 +219,14 @@ const openDeleteDialog = (company) => {
   isDeleteDialogOpen.value = true
 }
 
+// --- منطق الحذف ---
 const deleteSelectedCompany = async () => {
   if (companyToDelete.value) {
     try {
       await companyStore.deleteCompany(companyToDelete.value.id)
       toast.success(`تم حذف شركة '${companyToDelete.value.name}' بنجاح.`)
 
-      // إذا كانت الصفحة الحالية أصبحت فارغة بعد الحذف، نعود للصفحة السابقة
+      // إعادة تحميل البيانات
       const currentPage = pagination.value.current_page
       if (companies.value.length === 1 && currentPage > 1) {
         await handlePageChange(currentPage - 1)
@@ -233,7 +234,13 @@ const deleteSelectedCompany = async () => {
         await handlePageChange(currentPage)
       }
     } catch (error) {
-      toast.error('حدث خطأ أثناء محاولة الحذف.')
+      // --- التعديل الجوهري هنا ---
+      // 1. نحاول قراءة الرسالة من الـ Store أولاً (لأننا خزناها هناك في التعديل السابق)
+      // 2. أو نقرأها مباشرة من كائن الخطأ
+      const errorMessage =
+        companyStore.error || error.response?.data?.message || 'حدث خطأ غير متوقع أثناء الحذف.'
+
+      toast.error(errorMessage)
     } finally {
       isDeleteDialogOpen.value = false
       companyToDelete.value = null
