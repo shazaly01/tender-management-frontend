@@ -27,37 +27,50 @@
         </template>
 
         <template #cell-actions="{ item }">
-          <div class="flex items-center space-x-2 space-x-reverse">
-            <button
-              v-if="authStore.can('backup.download')"
-              @click.stop="handleDownload(item)"
-              class="p-1 text-emerald-500 hover:text-emerald-400 transition-colors"
-              title="تحميل النسخة"
+          <!-- --- التعديل الرئيسي هنا --- -->
+          <div class="flex items-center space-x-2 space-x-reverse min-h-[36px]">
+            <!-- عرض مؤشر التحميل -->
+            <div
+              v-if="downloadProgress.fileName === item.name"
+              class="flex items-center space-x-2 space-x-reverse text-sm text-emerald-500 w-full"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                ></path>
-              </svg>
-            </button>
+              <span>جاري التحميل...</span>
+              <span class="font-mono font-semibold">{{ downloadProgress.percentage }}%</span>
+            </div>
 
-            <button
-              v-if="authStore.can('backup.delete')"
-              @click.stop="openDeleteDialog(item)"
-              class="p-1 font-medium text-rose-500 hover:text-rose-400 transition-colors"
-              title="حذف النسخة"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fill-rule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-            </button>
+            <!-- إخفاء الأزرار أثناء تحميل نفس الملف -->
+            <template v-else>
+              <button
+                v-if="authStore.can('backup.download')"
+                @click.stop="handleDownload(item)"
+                class="p-1 text-emerald-500 hover:text-emerald-400 transition-colors"
+                title="تحميل النسخة"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  ></path>
+                </svg>
+              </button>
+
+              <button
+                v-if="authStore.can('backup.delete')"
+                @click.stop="openDeleteDialog(item)"
+                class="p-1 font-medium text-rose-500 hover:text-rose-400 transition-colors"
+                title="حذف النسخة"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+            </template>
           </div>
         </template>
       </AppTable>
@@ -79,7 +92,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 
-// استيراد المكونات (نفس المكونات المستخدمة في باقي الصفحات)
+// استيراد المكونات
 import AppTable from '@/components/ui/AppTable.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppCard from '@/components/ui/AppCard.vue'
@@ -88,7 +101,8 @@ import AppConfirmDialog from '@/components/ui/AppConfirmDialog.vue'
 // --- الإعدادات وحالة المتجر ---
 const backupStore = useBackupStore()
 const authStore = useAuthStore()
-const { backups, loading, creating } = storeToRefs(backupStore)
+// --- استيراد الحالة الجديدة ---
+const { backups, loading, creating, downloadProgress } = storeToRefs(backupStore)
 const toast = useToast()
 
 // --- تعريف أعمدة الجدول ---
@@ -97,7 +111,7 @@ const tableHeaders = computed(() => {
     { key: 'name', label: 'اسم الملف' },
     { key: 'size', label: 'الحجم' },
     { key: 'date', label: 'تاريخ الإنشاء' },
-    { key: 'actions', label: 'إجراءات', class: 'text-left' }, // محاذاة الإجراءات لليسار
+    { key: 'actions', label: 'إجراءات', class: 'text-left' },
   ]
 })
 
@@ -111,7 +125,6 @@ onMounted(() => {
 // --- منطق إنشاء نسخة جديدة ---
 const handleCreateBackup = async () => {
   try {
-    // عرض تنبيه للمستخدم لأن العملية قد تستغرق وقتاً
     toast.info('جاري إنشاء النسخة الاحتياطية... قد يستغرق ذلك وقتاً حسب حجم البيانات.')
     await backupStore.createBackup()
     toast.success('تم إنشاء النسخة الاحتياطية بنجاح.')
@@ -123,11 +136,18 @@ const handleCreateBackup = async () => {
 
 // --- منطق التحميل ---
 const handleDownload = async (item) => {
+  // التأكد من عدم وجود عملية تحميل أخرى جارية
+  if (downloadProgress.value.fileName) {
+    toast.warn('يرجى الانتظار حتى اكتمال التحميل الحالي.')
+    return
+  }
   try {
-    toast.info('جاري بدء التحميل...')
+    // لا نعرض رسالة البدء هنا لأن المؤشر المرئي كافٍ
     await backupStore.downloadBackup(item.name)
+    // نعرض رسالة النجاح بعد اكتمال العملية
+    toast.success(`اكتمل تحميل '${item.name}' بنجاح.`)
   } catch (error) {
-    toast.error('فشل تحميل الملف.')
+    toast.error(`فشل تحميل الملف '${item.name}'.`)
   }
 }
 

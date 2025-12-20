@@ -6,6 +6,13 @@ export const useBackupStore = defineStore('backup', {
     backups: [],
     loading: false, // لحالة جلب القائمة
     creating: false, // لحالة زر "إنشاء نسخة"
+    // --- الإضافة الجديدة ---
+    // لتتبع تقدم التحميل لملف معين
+    downloadProgress: {
+      fileName: null, // اسم الملف الذي يتم تحميله حالياً
+      percentage: 0, // نسبة التحميل
+    },
+    // --------------------
   }),
 
   actions: {
@@ -50,10 +57,24 @@ export const useBackupStore = defineStore('backup', {
       }
     },
 
-    // منطق تحميل الملف للمتصفح
+    // --- تعديل دالة التحميل ---
     async downloadBackup(fileName) {
+      // 1. تفعيل حالة التحميل
+      this.downloadProgress.fileName = fileName
+      this.downloadProgress.percentage = 0
+
       try {
-        const response = await backupService.download(fileName)
+        // 2. تعريف دالة لتحديث التقدم
+        const onProgress = (progressEvent) => {
+          // التأكد من وجود progressEvent.total لتجنب القسمة على صفر
+          if (progressEvent.total > 0) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            this.downloadProgress.percentage = percentCompleted
+          }
+        }
+
+        // 3. تمرير الدالة إلى السيرفس
+        const response = await backupService.download(fileName, onProgress)
 
         // إنشاء رابط وهمي في الذاكرة لتنزيل الملف
         const url = window.URL.createObjectURL(new Blob([response.data]))
@@ -69,6 +90,10 @@ export const useBackupStore = defineStore('backup', {
       } catch (error) {
         console.error('Failed to download backup', error)
         throw error
+      } finally {
+        // 4. إعادة تعيين حالة التحميل بعد الانتهاء أو الفشل
+        this.downloadProgress.fileName = null
+        this.downloadProgress.percentage = 0
       }
     },
   },

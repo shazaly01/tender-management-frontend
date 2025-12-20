@@ -22,13 +22,18 @@ export default {
     })
   },
 
-  // تحميل النسخة (مهم جداً: responseType: 'blob')
-  download(fileName) {
+  // --- تعديل دالة التحميل ---
+  // الآن تقبل دالة onProgress كمعامل ثاني اختياري
+  download(fileName, onProgress) {
     return apiClient.get(`${resource}/download`, {
       params: {
         file_name: fileName,
       },
       responseType: 'blob', // ضروري لكي يفهم المتصفح أنه ملف وليس نص JSON
+
+      // تمرير الدالة مباشرة إلى إعدادات axios
+      // إذا كانت onProgress غير معرفة (undefined)، سيتجاهلها axios ببساطة
+      onDownloadProgress: onProgress,
     })
   },
 }
