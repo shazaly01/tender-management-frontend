@@ -29,7 +29,7 @@
           </p>
         </div>
         <div>
-          <p class="text-xs text-gray-500 font-bold uppercase mb-1">رئيس مجلس الادارة</p>
+          <p class="text-xs text-gray-500 font-bold uppercase mb-1">المفوض</p>
           <p class="text-lg font-bold text-gray-800">{{ reportData.company.owner_name || '-' }}</p>
         </div>
       </div>
@@ -94,7 +94,21 @@
             class="border-b border-gray-300"
           >
             <td class="p-3 border border-gray-300 text-center font-bold">{{ index + 1 }}</td>
-            <td class="p-3 border border-gray-300 font-bold text-base">{{ project.name }}</td>
+            <td class="p-3 border border-gray-300">
+              <p class="font-black text-base mb-1.5">{{ project.name }}</p>
+
+              <div class="flex flex-col gap-1 text-xs text-gray-600">
+                <div v-if="project.contract_number" class="flex items-center gap-1">
+                  <span>رقم العقد:</span>
+                  <span class="font-mono font-bold text-black">{{ project.contract_number }}</span>
+                </div>
+
+                <div v-if="project.project_owner" class="flex items-center gap-1">
+                  <span>المالك:</span>
+                  <span class="font-bold text-black">{{ project.project_owner }}</span>
+                </div>
+              </div>
+            </td>
 
             <td class="p-3 border border-gray-300 text-gray-600">
               {{ formatCurrency(project.contract_value) }}

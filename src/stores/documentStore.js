@@ -45,7 +45,14 @@ export const useDocumentStore = defineStore('document', () => {
       await documentService.delete(docId)
       await fetchDocuments(targetId, targetType)
     } catch (err) {
-      error.value = 'Failed to delete document.'
+      // التغيير هنا: قراءة الرسالة من استجابة السيرفر
+      // err.response.data.message سيحتوي الآن على "عذراً، ليس لديك صلاحية..."
+      if (err.response && err.response.data && err.response.data.message) {
+        error.value = err.response.data.message
+      } else {
+        error.value = 'حدث خطأ غير متوقع أثناء حذف الملف.'
+      }
+
       throw err
     } finally {
       loading.value = false

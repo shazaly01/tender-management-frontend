@@ -54,7 +54,12 @@
             </button>
           </div>
 
-          <ProjectForm :initial-data="project" @submit="handleFormSubmit" />
+          <ProjectForm
+            :initial-data="project"
+            :is-saving="isSaving"
+            @submit="handleFormSubmit"
+            @cancel="close"
+          />
         </div>
       </Transition>
     </div>
@@ -73,6 +78,12 @@ const props = defineProps({
   project: {
     type: Object,
     default: null,
+  },
+  // --- إضافة جديدة ---
+  // نحتاج هذا البروب لنمرره للفورم ليعرف متى يظهر "جاري الحفظ"
+  isSaving: {
+    type: Boolean,
+    default: false,
   },
 })
 

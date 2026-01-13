@@ -146,7 +146,7 @@ const tableHeaders = computed(() => {
     { key: 'commercial_record', label: 'رقم السجل التجاري' },
     { key: 'tax_number', label: 'الرقم الضريبي' },
     { key: 'license_number', label: 'رقم الرخصة' },
-    { key: 'owner_name', label: 'رئيس مجلس الادارة' },
+    { key: 'owner_name', label: 'المفوض' },
   ]
   if (
     authStore.can('company.update') ||

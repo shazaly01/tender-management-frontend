@@ -34,7 +34,7 @@
 
       <AppInput
         id="company-owner-name"
-        label="رئيس مجلس الادارة"
+        label="المفوض"
         v-model="form.owner_name"
         placeholder="ادخل الاسم "
       />

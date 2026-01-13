@@ -18,14 +18,35 @@
 
     <!-- منطقة الفلترة -->
     <AppCard class="mb-8">
-      <div class="p-4">
-        <h3 class="font-semibold text-lg mb-4">اختر شركة لعرض كشف الحساب</h3>
-        <div class="max-w-md">
-          <CompaniesDropdown
-            id="report-company-select"
-            label="الشركة"
-            v-model="selectedCompanyId"
-            @update:modelValue="fetchReport"
+      <h3 class="font-semibold text-lg mb-4">خيارات التقرير</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+        <CompaniesDropdown
+          id="report-company-select"
+          label="الشركة"
+          v-model="selectedCompanyId"
+          @update:modelValue="fetchReport"
+        />
+
+        <div v-if="reportData">
+          <label for="owner-search" class="block text-sm font-medium text-text-primary mb-1">
+            بحث باسم المالك
+          </label>
+          <input
+            id="owner-search"
+            type="text"
+            v-model="ownerSearchQuery"
+            placeholder="اكتب اسم المالك..."
+            class="w-full rounded-lg border px-4 py-2.5 focus:outline-none focus:ring-1 transition-colors duration-200"
+            :class="[
+              /* [التعديل هنا] استخدام لون داكن صريح بدلاً من bg-surface-input */
+              'bg-gray-800 border-gray-600 text-white placeholder-gray-500',
+
+              /* ألوان التركيز (Focus) */
+              'focus:border-primary focus:ring-primary',
+
+              /* حالة التعطيل */
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+            ]"
           />
         </div>
       </div>
@@ -43,7 +64,7 @@
         <!-- تم إضافة Optional Chaining (?.) كحماية إضافية -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-text-secondary">
           <p><strong>الرقم الضريبي:</strong> {{ reportData.company?.tax_number || 'N/A' }}</p>
-          <p><strong>رئيس نجلس الادارة:</strong> {{ reportData.company?.owner_name || 'N/A' }}</p>
+          <p><strong>المفوض :</strong> {{ reportData.company?.owner_name || 'N/A' }}</p>
           <p><strong>العنوان:</strong> {{ reportData.company?.address || 'غير محدد' }}</p>
         </div>
       </div>
@@ -90,12 +111,26 @@
       <div class="space-y-4">
         <h3 class="text-lg font-semibold mb-4">تفاصيل المشاريع</h3>
         <div
-          v-for="project in reportData.projects"
+          v-for="project in filteredProjects"
           :key="project.id"
           class="border border-surface-border rounded-lg p-4 grid grid-cols-5 gap-4 items-center"
         >
           <div class="col-span-2">
-            <h4 class="font-semibold">مشروع: {{ project.name }}</h4>
+            <h4 class="font-semibold text-base text-white truncate" :title="project.name">
+              مشروع: {{ project.name }}
+            </h4>
+
+            <div class="flex flex-col gap-0.5 mt-1 text-xs">
+              <div v-if="project.contract_number" class="flex items-center gap-1.5">
+                <span class="text-gray-500">رقم العقد:</span>
+                <span class="font-mono text-emerald-400">{{ project.contract_number }}</span>
+              </div>
+
+              <div v-if="project.project_owner" class="flex items-center gap-1.5">
+                <span class="text-gray-500">المالك:</span>
+                <span class="text-sky-400">{{ project.project_owner }}</span>
+              </div>
+            </div>
           </div>
           <div>
             <p class="text-sm text-text-muted">قيمة العقد</p>
@@ -124,7 +159,7 @@
 
 <script setup>
 // --- (جزء الـ <script> يبقى كما هو تماماً، لا حاجة لتغييره) ---
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { PrinterIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -145,6 +180,7 @@ const selectedCompanyId = ref(null)
 const reportData = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const ownerSearchQuery = ref('')
 
 async function fetchReport() {
   if (!selectedCompanyId.value) {
@@ -167,6 +203,19 @@ async function fetchReport() {
     loading.value = false
   }
 }
+
+const filteredProjects = computed(() => {
+  if (!reportData.value?.projects) return []
+
+  // إذا كان حقل البحث فارغاً، نعرض كل المشاريع
+  if (!ownerSearchQuery.value) return reportData.value.projects
+
+  // البحث (Case insensitive)
+  const query = ownerSearchQuery.value.toLowerCase()
+  return reportData.value.projects.filter(
+    (project) => project.project_owner && project.project_owner.toLowerCase().includes(query),
+  )
+})
 
 const handlePrint = () => {
   if (!reportData.value) return

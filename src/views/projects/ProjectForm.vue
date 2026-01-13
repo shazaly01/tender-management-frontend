@@ -9,56 +9,86 @@
         required
       />
 
-      <AppInput
-        id="project-owner"
-        label="الجهة المالكة للمشروع"
-        v-model="form.project_owner"
-        placeholder="مثال: وزارة الإسكان، هيئة المشروعات..."
-      />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <AppInput
+          id="project-owner"
+          label="الجهة المالكة للمشروع"
+          v-model="form.project_owner"
+          placeholder="مثال: وزارة الإسكان..."
+        />
 
-      <CompaniesDropdown
-        id="project-company"
-        label="الشركة التابع لها المشروع"
-        v-model="form.company_id"
-        :required="true"
-      />
-      <p v-if="errors.company_id" class="text-rose-500 text-xs mt-1 font-bold">
-        يجب اختيار الشركة التابع لها المشروع
-      </p>
+        <AppInput
+          id="contract-number"
+          label="رقم العقد"
+          v-model="form.contract_number"
+          placeholder="ادخل رقم العقد"
+        />
+      </div>
 
-      <AppInput
-        id="project-contract-value"
-        label="قيمة العقد الكلية"
-        v-model="form.contract_value"
-        type="number"
-        step="0.01"
-        placeholder="ادخل قيمة العقد الإجمالية"
-      />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <CompaniesDropdown
+            id="project-company"
+            label="الشركة التابع لها المشروع"
+            v-model="form.company_id"
+            :required="true"
+          />
+          <p v-if="errors.company_id" class="text-rose-500 text-xs mt-1 font-bold">
+            يجب اختيار الشركة التابع لها المشروع
+          </p>
+        </div>
 
-      <AppInput
-        id="project-due-value"
-        label="القيمة المستحقة"
-        v-model="form.due_value"
-        type="number"
-        step="0.01"
-        placeholder="ادخل القيمة المستحقة الكلية"
-        required
-      />
+        <AppInput
+          id="project-region"
+          label="المنطقة"
+          v-model="form.region"
+          placeholder="مثال: بنغازى ..."
+        />
+      </div>
 
-      <AppInput
-        id="project-award-date"
-        label="تاريخ الترسية"
-        v-model="form.award_date"
-        type="date"
-        required
-      />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <CalculationOptionsDropdown
+          id="project-calculation-option"
+          label="خيار الاحتساب"
+          v-model="form.calculation_option_id"
+        />
+
+        <AppInput
+          id="project-award-date"
+          label="تاريخ الترسية"
+          v-model="form.award_date"
+          type="date"
+          required
+        />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <AppInput
+          id="project-contract-value"
+          label="قيمة العقد الكلية"
+          v-model="form.contract_value"
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+        />
+
+        <AppInput
+          id="project-due-value"
+          label="القيمة المستحقة"
+          v-model="form.due_value"
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+          required
+        />
+      </div>
 
       <AppTextarea
         id="project-description"
         label="وصف المشروع (اختياري)"
         v-model="form.description"
         placeholder="ادخل وصفاً موجزاً للمشروع"
-        rows="4"
+        rows="3"
       />
     </div>
 
@@ -80,6 +110,7 @@ import AppInput from '@/components/ui/AppInput.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
+import CalculationOptionsDropdown from '@/components/forms/CalculationOptionsDropdown.vue'
 
 const props = defineProps({
   initialData: {
@@ -103,6 +134,9 @@ const createFreshForm = () => ({
   id: null,
   name: '',
   project_owner: '',
+  contract_number: '',
+  region: '',
+  calculation_option_id: '',
   company_id: '',
   contract_value: '',
   due_value: '',
@@ -124,6 +158,9 @@ watch(
         id: newData.id,
         name: newData.name,
         project_owner: newData.project_owner || '',
+        contract_number: newData.contract_number || '',
+        region: newData.region || '',
+        calculation_option_id: newData.calculation_option_id || '',
         company_id: Number(newData.company_id || newData.company?.id),
         contract_value: newData.contract_value,
         due_value: newData.due_value,
