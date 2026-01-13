@@ -120,14 +120,21 @@
 
         <div class="flex-grow bg-gray-900 flex items-center justify-center overflow-auto p-2">
           <img
-            v-if="isImage(previewDoc.url)"
+            v-if="isImage(previewDoc.extension)"
             :src="previewDoc.url"
             class="max-w-full max-h-full object-contain"
             alt="Preview"
           />
 
+          <video
+            v-else-if="isVideo(previewDoc.extension)"
+            :src="previewDoc.url"
+            controls
+            class="max-w-full max-h-full"
+          ></video>
+
           <iframe
-            v-else-if="canPreviewInIframe(previewDoc.url)"
+            v-else-if="canPreviewInIframe(previewDoc.extension)"
             :src="previewDoc.url"
             class="w-full h-full border-none bg-white"
           ></iframe>
@@ -273,15 +280,20 @@ const closePreview = () => {
 }
 
 // دالة مساعدة: هل الملف صورة؟
-const isImage = (url) => {
-  if (!url) return false
-  return url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) != null
+const isImage = (ext) => {
+  if (!ext) return false
+  return ['jpeg', 'jpg', 'gif', 'png', 'webp', 'svg'].includes(ext.toLowerCase())
+}
+
+// دالة مساعدة: هل الملف فيديو؟
+const isVideo = (ext) => {
+  if (!ext) return false
+  return ['mp4', 'mov'].includes(ext.toLowerCase())
 }
 
 // دالة مساعدة: هل الملف قابل للعرض في Iframe؟
-const canPreviewInIframe = (url) => {
-  if (!url) return false
-  // PDF, TXT, JSON
-  return url.match(/\.(pdf|txt|json)$/i) != null
+const canPreviewInIframe = (ext) => {
+  if (!ext) return false
+  return ['pdf', 'txt', 'json'].includes(ext.toLowerCase())
 }
 </script>
