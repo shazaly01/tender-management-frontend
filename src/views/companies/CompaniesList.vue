@@ -40,6 +40,24 @@
             item.commercial_record || 'غير محدد'
           }}</span>
         </template>
+        <template #cell-phone="{ item }">
+          <span dir="ltr" class="text-text-secondary text-sm">{{ item.phone || '-' }}</span>
+        </template>
+
+        <template #cell-bank_info="{ item }">
+          <div class="flex flex-col text-xs max-w-[200px]">
+            <span v-if="item.bank_name" class="font-bold text-text-primary mb-0.5">
+              {{ item.bank_name }}
+            </span>
+            <span
+              v-if="item.account_number"
+              class="font-mono text-text-muted bg-gray-50 px-1 rounded w-fit"
+            >
+              {{ item.account_number }}
+            </span>
+            <span v-if="!item.bank_name && !item.account_number" class="text-text-muted">-</span>
+          </div>
+        </template>
         <template #cell-actions="{ item }">
           <div class="flex items-center space-x-2 space-x-reverse">
             <button
@@ -147,6 +165,8 @@ const tableHeaders = computed(() => {
     { key: 'tax_number', label: 'الرقم الضريبي' },
     { key: 'license_number', label: 'رقم الرخصة' },
     { key: 'owner_name', label: 'المفوض' },
+    { key: 'phone', label: 'الهاتف' },
+    { key: 'bank_info', label: 'البيانات البنكية' },
   ]
   if (
     authStore.can('company.update') ||

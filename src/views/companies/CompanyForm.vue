@@ -1,7 +1,6 @@
-<!-- src/views/companies/CompanyForm.vue -->
 <template>
   <form @submit.prevent="handleSubmit">
-    <div class="space-y-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <AppInput
         id="company-name"
         label="اسم الشركة"
@@ -9,11 +8,12 @@
         placeholder="ادخل اسم الشركة"
         required
       />
+
       <AppInput
-        id="company-tax-number"
-        label="الرقم الضريبي"
-        v-model="form.tax_number"
-        placeholder="ادخل الرقم الضريبي"
+        id="company-owner-name"
+        label="المفوض"
+        v-model="form.owner_name"
+        placeholder="ادخل الاسم"
       />
 
       <AppInput
@@ -23,26 +23,48 @@
         placeholder="ادخل رقم السجل التجاري"
       />
 
-      <!-- === [تمت الإضافة هنا] === -->
       <AppInput
         id="company-license-number"
         label="رقم الرخصة"
         v-model="form.license_number"
         placeholder="ادخل رقم الرخصة (اختياري)"
       />
-      <!-- === [نهاية الإضافة] === -->
 
       <AppInput
-        id="company-owner-name"
-        label="المفوض"
-        v-model="form.owner_name"
-        placeholder="ادخل الاسم "
+        id="company-tax-number"
+        label="الرقم الضريبي"
+        v-model="form.tax_number"
+        placeholder="ادخل الرقم الضريبي"
       />
+
       <AppInput
-        id="company-address"
-        label="العنوان"
-        v-model="form.address"
-        placeholder="ادخل عنوان الشركة"
+        id="company-phone"
+        label="رقم الهاتف"
+        v-model="form.phone"
+        placeholder="مثال: 091xxxxxxx"
+      />
+
+      <div class="md:col-span-2">
+        <AppInput
+          id="company-address"
+          label="العنوان"
+          v-model="form.address"
+          placeholder="ادخل عنوان الشركة"
+        />
+      </div>
+
+      <AppInput
+        id="company-bank-name"
+        label="اسم البنك"
+        v-model="form.bank_name"
+        placeholder="ادخل اسم البنك"
+      />
+
+      <AppInput
+        id="company-account-number"
+        label="رقم الحساب / IBAN"
+        v-model="form.account_number"
+        placeholder="ادخل رقم الحساب"
       />
     </div>
 
@@ -82,6 +104,9 @@ const createFreshForm = () => ({
   license_number: '', // تمت إضافة الحقل الجديد
   owner_name: '',
   address: '',
+  phone: '',
+  bank_name: '',
+  account_number: '',
 })
 
 const form = ref(createFreshForm())
@@ -100,6 +125,9 @@ watch(
         license_number: newData.license_number || '', // تمت إضافة الحقل الجديد
         owner_name: newData.owner_name,
         address: newData.address,
+        phone: newData.phone || '',
+        bank_name: newData.bank_name || '',
+        account_number: newData.account_number || '',
       }
     } else {
       // إعادة تعيين النموذج عند الإضافة
