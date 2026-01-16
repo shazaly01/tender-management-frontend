@@ -12,8 +12,10 @@
     <ProjectsFilter
       v-model="selectedCompanyId"
       v-model:searchQuery="searchQuery"
+      v-model:permissionFilter="permissionFilter"
       @update:modelValue="handlePageChange(1)"
       @update:searchQuery="onSearch"
+      @update:permissionFilter="handlePageChange(1)"
     />
 
     <!-- قطعة الليغو 2: الجدول -->
@@ -80,6 +82,7 @@ const { projects, loading, pagination } = storeToRefs(projectStore)
 const toast = useToast()
 
 const selectedCompanyId = ref(null) // حالة الفلتر
+const permissionFilter = ref('')
 const isDocumentsModalOpen = ref(false)
 const projectForDocuments = ref(null)
 
@@ -104,6 +107,7 @@ const handlePageChange = (page = 1) => {
   const filters = {
     search: searchQuery.value,
     company_id: selectedCompanyId.value,
+    has_contract_permission: permissionFilter.value, // <--- 2. تمت الإضافة هنا
   }
 
   projectStore.fetchProjects(page, filters).catch(() => {

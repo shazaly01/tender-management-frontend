@@ -91,11 +91,17 @@
 
       <template #cell-meta_info="{ item }">
         <div class="flex flex-col items-start gap-2">
-          <div
-            class="flex items-center gap-1.5 text-sm text-text-secondary bg-surface-ground px-2 py-1 rounded-md border border-surface-border"
+          <span
+            :class="[
+              'px-2 py-0.5 text-[10px] font-bold rounded-full border flex items-center gap-1',
+              item.has_contract_permission
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                : 'bg-orange-50 text-orange-700 border-orange-100',
+            ]"
           >
             <svg
-              class="w-4 h-4 text-text-muted"
+              v-if="item.has_contract_permission"
+              class="w-3 h-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -104,11 +110,20 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                d="M5 13l4 4L19 7"
               />
             </svg>
-            <span class="text-xs">{{ formatDate(item.award_date) }}</span>
-          </div>
+            <svg v-else class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+
+            {{ item.has_contract_permission ? 'يوجد إذن تعاقد' : 'لا يوجد إذن تعاقد' }}
+          </span>
 
           <span
             v-if="item.calculation_option"
@@ -230,7 +245,7 @@ const tableHeaders = computed(() => {
     // دمجنا البيانات المالية
     { key: 'financials', label: 'البيانات المالية' },
     // دمجنا الترسية + خيار الاحتساب
-    { key: 'meta_info', label: 'الترسية والاحتساب' },
+    { key: 'meta_info', label: 'الاذن والاحتساب' },
   ]
 
   // عمود الإجراءات (يظهر فقط إذا كان للمستخدم صلاحية واحدة على الأقل)

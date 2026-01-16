@@ -25,6 +25,21 @@
         />
       </div>
 
+      <div class="mt-3 flex items-center">
+        <input
+          id="has-contract-permission"
+          type="checkbox"
+          v-model="form.has_contract_permission"
+          class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+        />
+        <label
+          for="has-contract-permission"
+          class="mr-2 text-sm font-medium text-white select-none cursor-pointer"
+        >
+          يوجد إذن تعاقد لهذا المشروع
+        </label>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <CompaniesDropdown
@@ -142,6 +157,7 @@ const createFreshForm = () => ({
   due_value: '',
   award_date: '',
   description: '',
+  has_contract_permission: false,
 })
 
 const form = ref(createFreshForm())
@@ -166,6 +182,7 @@ watch(
         due_value: newData.due_value,
         award_date: formattedDate,
         description: newData.description || '',
+        has_contract_permission: Boolean(newData.has_contract_permission),
       }
     } else {
       form.value = createFreshForm()
