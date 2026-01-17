@@ -6,6 +6,7 @@ export const useDocumentStore = defineStore('document', () => {
   const documents = ref([])
   const loading = ref(false)
   const error = ref(null)
+  const uploadProgress = ref(0)
 
   // نمرر المعرف والنوع للجلب الصحيح
   async function fetchDocuments(targetId, targetType) {
@@ -26,8 +27,11 @@ export const useDocumentStore = defineStore('document', () => {
   async function createDocument(payload) {
     loading.value = true
     error.value = null
+    uploadProgress.value = 0
     try {
-      await documentService.create(payload)
+      await documentService.create(payload, (event) => {
+        uploadProgress.value = Math.round((event.loaded * 100) / event.total)
+      })
       // التحديث بعد الرفع باستخدام البيانات الجديدة
       await fetchDocuments(payload.target_id, payload.target_type)
     } catch (err) {
@@ -35,6 +39,7 @@ export const useDocumentStore = defineStore('document', () => {
       throw err
     } finally {
       loading.value = false
+      setTimeout(() => (uploadProgress.value = 0), 1000)
     }
   }
 
@@ -59,5 +64,13 @@ export const useDocumentStore = defineStore('document', () => {
     }
   }
 
-  return { documents, loading, error, fetchDocuments, createDocument, deleteDocument }
+  return {
+    documents,
+    loading,
+    error,
+    uploadProgress,
+    fetchDocuments,
+    createDocument,
+    deleteDocument,
+  }
 })

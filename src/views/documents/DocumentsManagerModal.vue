@@ -45,6 +45,7 @@
             :target-id="owner.id"
             :target-type="targetType"
             :is-saving="loading"
+            :upload-progress="uploadProgress"
             @submit="handleUploadDocument"
             @cancel="closeModal"
             class="mb-8"
@@ -176,7 +177,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const documentStore = useDocumentStore()
-const { documents, loading, error } = storeToRefs(documentStore)
+const { documents, loading, error, uploadProgress } = storeToRefs(documentStore)
 const toast = useToast()
 const documentFormRef = ref(null)
 

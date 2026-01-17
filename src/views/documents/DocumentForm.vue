@@ -18,7 +18,7 @@
           for="document-file"
           class="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1"
         >
-          ملف المستند (PDF, صور, فيديو حتى 50 ميجا)
+          ملف المستند (PDF, صور, فيديو حتى 250 ميجا)
         </label>
         <input
           id="document-file"
@@ -36,6 +36,18 @@
       </div>
     </div>
 
+    <div v-if="isSaving && uploadProgress > 0" class="mt-4 mb-4">
+      <div class="flex justify-between mb-1">
+        <span class="text-xs font-medium text-blue-700 dark:text-white">جاري الرفع...</span>
+        <span class="text-xs font-medium text-blue-700 dark:text-white">{{ uploadProgress }}%</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+        <div
+          class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+          :style="{ width: uploadProgress + '%' }"
+        ></div>
+      </div>
+    </div>
     <div class="mt-6 flex justify-end space-x-3 space-x-reverse">
       <AppButton type="button" variant="secondary" @click="handleCancel"> إلغاء </AppButton>
       <AppButton type="submit" :disabled="isSaving || !form.file">
@@ -66,6 +78,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  uploadProgress: { type: Number, default: 0 },
   serverError: { type: String, default: null },
 })
 
@@ -99,7 +112,7 @@ const handleFileChange = (event) => {
   }
 
   // التحديث 4: تحقق أولي سريع في الواجهة الأمامية قبل الرفع
-  const maxSize = 50 * 1024 * 1024 // 50MB
+  const maxSize = 250 * 1024 * 1024 // 50MB
   if (file.size > maxSize) {
     fileError.value = 'حجم الملف يتجاوز 50 ميجابايت، يرجى اختيار ملف أصغر.'
     form.value.file = null

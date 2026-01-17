@@ -19,10 +19,11 @@ export default {
   /**
    * رفع مستند جديد باستخدام FormData لدعم الملفات
    */
-  create(payload) {
+  // عدل هذا الجزء فقط
+  create(payload, onUploadProgress) {
+    // <--- 1. إضافة المعامل هنا
     const formData = new FormData()
 
-    // إرسال البيانات الجديدة المتوافقة مع الـ Backend المحدث
     formData.append('target_id', payload.target_id)
     formData.append('target_type', payload.target_type)
     formData.append('name', payload.name)
@@ -35,6 +36,7 @@ export default {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      onUploadProgress: onUploadProgress, // <--- 2. تمرير الدالة لـ Axios
     })
   },
 
