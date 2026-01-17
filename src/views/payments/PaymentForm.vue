@@ -7,7 +7,7 @@
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- حقل مبلغ الدفعة -->
-        <AppInput
+        <AppCurrencyInput
           id="payment-amount"
           label="مبلغ الدفعة"
           v-model="form.amount"
@@ -56,6 +56,7 @@ import { ref, watch } from 'vue'
 import AppInput from '@/components/ui/AppInput.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import AppCurrencyInput from '@/components/ui/AppCurrencyInput.vue'
 
 const props = defineProps({
   initialData: { type: Object, default: null },

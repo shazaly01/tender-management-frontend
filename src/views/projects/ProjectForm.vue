@@ -68,17 +68,17 @@
           v-model="form.calculation_option_id"
         />
 
-        <AppInput
+        <!-- <AppInput
           id="project-award-date"
           label="تاريخ الترسية"
           v-model="form.award_date"
           type="date"
           required
-        />
+        /> -->
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <AppInput
+        <AppCurrencyInput
           id="project-contract-value"
           label="قيمة العقد الكلية"
           v-model="form.contract_value"
@@ -87,7 +87,7 @@
           placeholder="0.00"
         />
 
-        <AppInput
+        <AppCurrencyInput
           id="project-due-value"
           label="القيمة المستحقة"
           v-model="form.due_value"
@@ -126,6 +126,7 @@ import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
 import CalculationOptionsDropdown from '@/components/forms/CalculationOptionsDropdown.vue'
+import AppCurrencyInput from '@/components/ui/AppCurrencyInput.vue'
 
 const props = defineProps({
   initialData: {
