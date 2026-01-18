@@ -14,6 +14,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 // سنقوم بإنشاء هذه المكونات لاحقًا، ولكننا نجهز المسارات لها الآن.
 // من الأفضل استخدام الاستيراد الديناميكي (dynamic import) لتحسين الأداء.
 const CompaniesList = () => import('@/views/companies/CompaniesList.vue')
+const OwnersList = () => import('@/views/owners/OwnersList.vue')
 const ProjectsList = () => import('@/views/projects/ProjectsList.vue')
 const UsersList = () => import('@/views/users/UsersList.vue')
 const RolesList = () => import('@/views/roles/RolesList.vue')
@@ -67,6 +68,12 @@ const routes = [
         name: 'BackupsList',
         component: () => import('@/views/settings/BackupsList.vue'),
         meta: { permission: 'backup.view' },
+      },
+      {
+        path: 'owners',
+        name: 'OwnersList',
+        component: OwnersList,
+        meta: { permission: 'owner.view' },
       },
       // --- مسارات إدارة بيانات العطاءات ---
       {

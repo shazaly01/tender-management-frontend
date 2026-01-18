@@ -114,6 +114,7 @@ const allNavLinks = shallowRef([
     icon: BuildingOffice2Icon, // أيقونة جديدة
     permission: 'company.view', // صلاحية المجموعة
     children: [
+      { name: 'الجهات المالكة', routeName: 'OwnersList', permission: 'owner.view' },
       { name: 'الشركات', routeName: 'CompaniesList', permission: 'company.view' },
       { name: 'المشاريع', routeName: 'ProjectsList', permission: 'project.view' },
     ],
