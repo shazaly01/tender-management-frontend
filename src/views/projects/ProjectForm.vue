@@ -10,12 +10,7 @@
       />
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <AppInput
-          id="project-owner"
-          label="الجهة المالكة للمشروع"
-          v-model="form.project_owner"
-          placeholder="مثال: وزارة الإسكان..."
-        />
+        <OwnersDropdown id="project-owner" label="الجهة المالكة للمشروع" v-model="form.owner_id" />
 
         <AppInput
           id="contract-number"
@@ -125,6 +120,7 @@ import AppInput from '@/components/ui/AppInput.vue'
 import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
+import OwnersDropdown from '@/components/forms/OwnersDropdown.vue'
 import CalculationOptionsDropdown from '@/components/forms/CalculationOptionsDropdown.vue'
 import AppCurrencyInput from '@/components/ui/AppCurrencyInput.vue'
 
@@ -149,7 +145,8 @@ const errors = reactive({
 const createFreshForm = () => ({
   id: null,
   name: '',
-  project_owner: '',
+  // project_owner: '',
+  owner_id: '',
   contract_number: '',
   region: '',
   calculation_option_id: '',
@@ -174,7 +171,8 @@ watch(
       form.value = {
         id: newData.id,
         name: newData.name,
-        project_owner: newData.project_owner || '',
+        // project_owner: newData.project_owner || '',
+        owner_id: newData.owner_id || '',
         contract_number: newData.contract_number || '',
         region: newData.region || '',
         calculation_option_id: newData.calculation_option_id || '',

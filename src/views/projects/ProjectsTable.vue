@@ -45,7 +45,9 @@
 
       <template #cell-owner_info="{ item }">
         <div class="flex flex-col gap-1">
-          <span class="font-medium text-sm text-text-primary">{{ item.project_owner || '-' }}</span>
+          <span class="font-medium text-sm text-text-primary">
+            {{ item.owner?.name || item.project_owner || '-' }}
+          </span>
 
           <div v-if="item.region" class="flex items-center gap-1 text-xs text-text-muted">
             <svg
