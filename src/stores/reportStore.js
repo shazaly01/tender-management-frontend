@@ -6,6 +6,7 @@ export const useReportStore = defineStore('report', () => {
   // --- State ---
   const dashboardStats = ref(null)
   const companyStatement = ref(null)
+  const ownerStatement = ref(null)
   const companiesSummary = ref([]) // [جديد] حالة التقرير العام
   const grandSummary = ref(null) // [جديد] حالة الإجماليات النهائية
   const loading = ref(false)
@@ -60,16 +61,40 @@ export const useReportStore = defineStore('report', () => {
     }
   }
 
+  // +++ [أضف هذه الدالة كاملة] +++
+  async function fetchOwnerStatement(ownerId) {
+    loading.value = true
+    error.value = null
+    ownerStatement.value = null // تصفير البيانات القديمة
+
+    try {
+      // استدعاء الدالة التي أضفناها للتو في reportService
+      const response = await reportService.getOwnerStatement(ownerId)
+      ownerStatement.value = response.data.data
+    } catch (err) {
+      error.value = 'فشل في جلب كشف حساب الجهة المالكة.'
+      console.error(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   // --- Return public API ---
   return {
     dashboardStats,
     companyStatement,
-    companiesSummary, // تصدير الحالة الجديدة
-    grandSummary, // تصدير الإجماليات
+
+    // +++ [أضف هذين السطرين] +++
+    ownerStatement, // المتغير
+    fetchOwnerStatement, // الدالة
+    // ++++++++++++++++++++++++++
+
+    companiesSummary,
+    grandSummary,
     loading,
     error,
     fetchDashboardStats,
     fetchCompanyStatement,
-    fetchCompaniesSummary, // تصدير الأكشن الجديد
+    fetchCompaniesSummary,
   }
 })

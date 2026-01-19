@@ -10,7 +10,7 @@ export default {
   },
 
   /**
-   * [جديد] جلب التقرير العام (ملخص كل الشركات)
+   * جلب التقرير العام (ملخص كل الشركات)
    */
   getCompaniesSummary() {
     return apiClient.get('/reports/companies-summary')
@@ -23,4 +23,14 @@ export default {
   getCompanyStatement(companyId) {
     return apiClient.get(`/reports/company-statement/${companyId}`)
   },
+
+  // +++ [أضف هذه الدالة الجديدة هنا] +++
+  /**
+   * جلب كشف حساب تفصيلي لجهة مالكة محددة
+   * @param {String|Number} ownerId
+   */
+  getOwnerStatement(ownerId) {
+    return apiClient.get(`/reports/owner-statement/${ownerId}`)
+  },
+  // ++++++++++++++++++++++++++++++++++
 }

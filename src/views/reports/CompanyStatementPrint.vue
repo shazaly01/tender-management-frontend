@@ -5,7 +5,7 @@
         <img src="/MainLogo2.png" alt="Logo" class="w-16 h-16 object-contain" />
         <div>
           <h1 class="text-2xl font-black text-gray-900 tracking-tight">نظام حصر الديون</h1>
-          <p class="text-base font-bold text-gray-600">تقرير كشف حساب شركة تفصيلي</p>
+          <p class="text-base font-bold text-gray-600">{{ reportTitle }}</p>
         </div>
       </div>
 
@@ -15,21 +15,32 @@
       </div>
     </div>
 
-    <div v-if="reportData?.company" class="bg-gray-50 border border-gray-200 rounded p-3 mb-6">
-      <div class="grid grid-cols-3 gap-4">
+    <div v-if="reportData" class="bg-gray-50 border border-gray-200 rounded p-3 mb-6">
+      <div v-if="reportType === 'company'" class="grid grid-cols-3 gap-4">
         <div>
           <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">اسم الشركة</p>
-          <p class="text-sm font-black text-gray-900 truncate">{{ reportData.company.name }}</p>
+          <p class="text-sm font-black text-gray-900 truncate">{{ reportData.company?.name }}</p>
         </div>
         <div>
           <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">الرقم الضريبي</p>
           <p class="text-sm font-bold text-gray-800 font-mono">
-            {{ reportData.company.tax_number || '-' }}
+            {{ reportData.company?.tax_number || '-' }}
           </p>
         </div>
         <div>
           <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">المفوض</p>
-          <p class="text-sm font-bold text-gray-800">{{ reportData.company.owner_name || '-' }}</p>
+          <p class="text-sm font-bold text-gray-800">{{ reportData.company?.owner_name || '-' }}</p>
+        </div>
+      </div>
+
+      <div v-else class="grid grid-cols-3 gap-4">
+        <div class="col-span-2">
+          <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">اسم الجهة المالكة</p>
+          <p class="text-sm font-black text-gray-900 truncate">{{ reportData.owner?.name }}</p>
+        </div>
+        <div>
+          <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">نوع التقرير</p>
+          <p class="text-sm font-bold text-gray-800">مجمع مشاريع</p>
         </div>
       </div>
     </div>
@@ -108,13 +119,20 @@
                   </span>
                 </div>
 
-                <span v-if="project.contract_number && project.project_owner" class="text-gray-300"
-                  >|</span
-                >
+                <span v-if="project.contract_number" class="text-gray-300">|</span>
 
-                <div v-if="project.project_owner" class="flex items-center gap-1">
+                <div v-if="reportType === 'company'" class="flex items-center gap-1">
                   <span>المالك:</span>
-                  <span class="font-bold text-black">{{ project.project_owner }}</span>
+                  <span class="font-bold text-black">
+                    {{ project.owner?.name || project.project_owner || 'غير محدد' }}
+                  </span>
+                </div>
+
+                <div v-else class="flex items-center gap-1">
+                  <span>المنفذ:</span>
+                  <span class="font-bold text-black">
+                    {{ project.company?.name || 'غير محدد' }}
+                  </span>
                 </div>
               </div>
             </td>
@@ -129,18 +147,22 @@
             <td
               class="p-1 border border-gray-300 text-emerald-800 font-bold whitespace-nowrap align-top"
             >
-              {{ formatNumber(project.total_paid) }}
+              {{ formatNumber(project.total_paid || project.payments_sum_amount) }}
             </td>
             <td
               class="p-1 border border-gray-300 font-black text-rose-800 whitespace-nowrap align-top"
             >
-              {{ formatNumber(project.due_value - project.total_paid) }}
+              {{
+                formatNumber(
+                  project.due_value - (project.total_paid || project.payments_sum_amount || 0),
+                )
+              }}
             </td>
           </tr>
 
           <tr v-if="!reportData?.projects?.length">
             <td colspan="6" class="p-4 text-center text-gray-500 text-xs">
-              لا توجد مشاريع مسجلة لهذه الشركة
+              لا توجد مشاريع مسجلة في هذا التقرير
             </td>
           </tr>
         </tbody>
@@ -173,15 +195,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-// نستخدم formatCurrency للكروت العلوية فقط
+import { ref, onMounted, computed } from 'vue'
 import { formatCurrency } from '@/utils/formatters'
 
 const reportData = ref(null)
+// متغير جديد لتحديد نوع التقرير (افتراضياً شركة)
+const reportType = ref('company')
+
 const currentDate = new Date().toLocaleDateString('ar-EG')
 const currentTime = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
 
-// دالة تنسيق الأرقام للجدول (بدون عملة، بدون كسور)
+// عنوان التقرير الديناميكي
+const reportTitle = computed(() => {
+  return reportType.value === 'company'
+    ? 'تقرير كشف حساب شركة تفصيلي'
+    : 'تقرير كشف حساب جهة مالكة تفصيلي'
+})
+
 const formatNumber = (value) => {
   if (value === undefined || value === null) return '0'
   return new Intl.NumberFormat('en-US', {
@@ -195,7 +225,16 @@ onMounted(() => {
 
   if (savedData) {
     try {
-      reportData.value = JSON.parse(savedData)
+      const parsed = JSON.parse(savedData)
+
+      // هنا نستلم نوع التقرير الذي أرسلناه من الصفحة السابقة
+      if (parsed.reportType) {
+        reportType.value = parsed.reportType
+      }
+
+      // نضع البيانات في المتغير
+      reportData.value = parsed
+
       setTimeout(() => {
         window.print()
       }, 1000)
@@ -209,7 +248,7 @@ onMounted(() => {
 <style scoped>
 @media print {
   @page {
-    size: A4 portrait; /* طولي */
+    size: A4 portrait;
     margin: 10mm;
   }
 
