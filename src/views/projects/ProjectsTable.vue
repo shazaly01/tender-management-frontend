@@ -43,6 +43,56 @@
         </div>
       </template>
 
+      <!-- ▼▼▼ استبدل القالب القديم بهذا القالب المحدّث ▼▼▼ -->
+      <template #cell-status="{ item }">
+        <div class="flex flex-col gap-2 min-w-[150px]">
+          <!-- شريط نسبة الإنجاز -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-xs font-medium text-text-muted">نسبة الإنجاز</span>
+              <!-- تغيير لون النسبة أيضاً -->
+              <span
+                :class="[
+                  'text-xs font-bold',
+                  {
+                    'text-emerald-500': item.completion_percentage === 100,
+                    'text-sky-500':
+                      item.completion_percentage > 0 && item.completion_percentage < 100,
+                    'text-gray-500': item.completion_percentage === 0,
+                  },
+                ]"
+              >
+                {{ item.completion_percentage }}%
+              </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5">
+              <!-- التعديل الدقيق هنا: استخدام :class لتلوين الشريط -->
+              <div
+                :class="[
+                  'h-1.5 rounded-full',
+                  {
+                    'bg-emerald-500': item.completion_percentage === 100, // أخضر للمكتمل
+                    'bg-sky-500':
+                      item.completion_percentage > 0 && item.completion_percentage < 100, // أزرق للمشروع قيد التنفيذ
+                    'bg-gray-400': item.completion_percentage === 0, // رمادي للمشروع الذي لم يبدأ
+                  },
+                ]"
+                :style="{ width: item.completion_percentage + '%' }"
+              ></div>
+            </div>
+          </div>
+
+          <!-- نوع المشروع (يبقى كما هو) -->
+          <div v-if="item.project_type" class="flex items-center">
+            <span class="text-xs font-medium text-text-muted">النوع:</span>
+            <span class="text-xs font-bold text-text-primary mr-1">{{
+              item.project_type.name
+            }}</span>
+          </div>
+        </div>
+      </template>
+      <!-- ▲▲▲ نهاية التحديث ▲▲▲ -->
+
       <template #cell-owner_info="{ item }">
         <div class="flex flex-col gap-1">
           <span class="font-medium text-sm text-text-primary">
@@ -246,6 +296,8 @@ const tableHeaders = computed(() => {
     { key: 'owner_info', label: 'المالك والموقع' },
     // دمجنا البيانات المالية
     { key: 'financials', label: 'البيانات المالية' },
+
+    { key: 'status', label: 'حالة المشروع', class: 'min-w-[170px]' },
     // دمجنا الترسية + خيار الاحتساب
     { key: 'meta_info', label: 'الاذن والاحتساب' },
   ]

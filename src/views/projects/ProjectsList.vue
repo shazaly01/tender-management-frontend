@@ -13,9 +13,13 @@
       v-model="selectedCompanyId"
       v-model:searchQuery="searchQuery"
       v-model:permissionFilter="permissionFilter"
+      v-model:projectTypeFilter="projectTypeFilter"
+      v-model:completionStatusFilter="completionStatusFilter"
       @update:modelValue="handlePageChange(1)"
       @update:searchQuery="onSearch"
       @update:permissionFilter="handlePageChange(1)"
+      @update:projectTypeFilter="handlePageChange(1)"
+      @update:completionStatusFilter="handlePageChange(1)"
     />
 
     <!-- قطعة الليغو 2: الجدول -->
@@ -87,6 +91,8 @@ const isDocumentsModalOpen = ref(false)
 const projectForDocuments = ref(null)
 
 const searchQuery = ref('') // حالة نص البحث الجديدة
+const projectTypeFilter = ref(null) // لتخزين ID نوع المشروع
+const completionStatusFilter = ref('') // لتخزين قيمة حالة الإنجاز
 let searchTimeout = null // مؤقت البحث
 
 // دالة البحث مع Debounce (نصف ثانية)
@@ -108,6 +114,8 @@ const handlePageChange = (page = 1) => {
     search: searchQuery.value,
     company_id: selectedCompanyId.value,
     has_contract_permission: permissionFilter.value, // <--- 2. تمت الإضافة هنا
+    project_type_id: projectTypeFilter.value,
+    completion_status: completionStatusFilter.value,
   }
 
   projectStore.fetchProjects(page, filters).catch(() => {

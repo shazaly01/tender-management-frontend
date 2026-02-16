@@ -57,6 +57,22 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <ProjectTypesDropdown
+          id="project-type"
+          label="نوع المشروع"
+          v-model="form.project_type_id"
+        />
+
+        <AppDropdown
+          id="completion-percentage"
+          label="نسبة الإنجاز"
+          v-model="form.completion_percentage"
+          :options="completionOptions"
+          placeholder="اختر النسبة"
+        />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <CalculationOptionsDropdown
           id="project-calculation-option"
           label="خيار الاحتساب"
@@ -121,6 +137,8 @@ import AppTextarea from '@/components/ui/AppTextarea.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
 import OwnersDropdown from '@/components/forms/OwnersDropdown.vue'
+import ProjectTypesDropdown from '@/components/forms/ProjectTypesDropdown.vue'
+import AppDropdown from '@/components/ui/AppDropdown.vue'
 import CalculationOptionsDropdown from '@/components/forms/CalculationOptionsDropdown.vue'
 import AppCurrencyInput from '@/components/ui/AppCurrencyInput.vue'
 
@@ -142,6 +160,20 @@ const errors = reactive({
   company_id: false,
 })
 
+const completionOptions = [
+  { id: 0, name: '0%' },
+  { id: 10, name: '10%' },
+  { id: 20, name: '20%' },
+  { id: 30, name: '30%' },
+  { id: 40, name: '40%' },
+  { id: 50, name: '50%' },
+  { id: 60, name: '60%' },
+  { id: 70, name: '70%' },
+  { id: 80, name: '80%' },
+  { id: 90, name: '90%' },
+  { id: 100, name: '100%' },
+]
+
 const createFreshForm = () => ({
   id: null,
   name: '',
@@ -149,6 +181,8 @@ const createFreshForm = () => ({
   owner_id: '',
   contract_number: '',
   region: '',
+  project_type_id: '', // القيمة الافتراضية فارغة
+  completion_percentage: 0, // القيمة الافتراضية 0
   calculation_option_id: '',
   company_id: '',
   contract_value: '',
@@ -175,6 +209,8 @@ watch(
         owner_id: newData.owner_id || '',
         contract_number: newData.contract_number || '',
         region: newData.region || '',
+        project_type_id: newData.project_type_id || '',
+        completion_percentage: newData.completion_percentage || 0,
         calculation_option_id: newData.calculation_option_id || '',
         company_id: Number(newData.company_id || newData.company?.id),
         contract_value: newData.contract_value,

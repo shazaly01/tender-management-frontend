@@ -32,5 +32,14 @@ export default {
   getOwnerStatement(ownerId) {
     return apiClient.get(`/reports/owner-statement/${ownerId}`)
   },
+
+  /**
+   * [جديد] جلب تقرير مالي للمشاريع بناءً على الفلاتر
+   * @param {Object} params - كائن يحتوي على الفلاتر مثل { project_type_id, completion_status }
+   */
+  getProjectsReportByFilter(params) {
+    // نرسل الفلاتر كـ query parameters مع الطلب
+    return apiClient.get('/reports/projects-by-filter', { params })
+  },
   // ++++++++++++++++++++++++++++++++++
 }

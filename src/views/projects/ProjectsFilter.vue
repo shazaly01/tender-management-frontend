@@ -1,19 +1,42 @@
 <template>
   <AppCard class="mb-6">
     <div class="p-4">
-      <div class="flex flex-col md:flex-row md:items-end gap-4">
-        <div class="flex-grow max-w-sm">
-          <h3 class="font-semibold text-sm mb-2 text-text-secondary">فلترة حسب الشركة</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+        <div class="w-full">
+          <h3 class="font-semibold text-sm mb-2 text-text-secondary">الشركة</h3>
           <CompaniesDropdown
             id="project-company-filter"
             label=""
             :model-value="modelValue"
             @update:modelValue="$emit('update:modelValue', $event)"
-            placeholder="عرض كل الشركات"
+            placeholder="الكل"
           />
         </div>
 
-        <div class="w-full md:w-48">
+        <div class="w-full">
+          <h3 class="font-semibold text-sm mb-2 text-text-secondary">نوع المشروع</h3>
+          <ProjectTypesDropdown
+            id="project-type-filter"
+            label=""
+            :model-value="projectTypeFilter"
+            @update:modelValue="$emit('update:projectTypeFilter', $event)"
+            placeholder="الكل"
+          />
+        </div>
+
+        <div class="w-full">
+          <h3 class="font-semibold text-sm mb-2 text-text-secondary">حالة الإنجاز</h3>
+          <AppDropdown
+            id="completion-status-filter"
+            label=""
+            :model-value="completionStatusFilter"
+            @update:modelValue="$emit('update:completionStatusFilter', $event)"
+            :options="completionOptions"
+            placeholder="الكل"
+          />
+        </div>
+
+        <div class="w-full">
           <h3 class="font-semibold text-sm mb-2 text-text-secondary">إذن التعاقد</h3>
           <div class="relative">
             <select
@@ -43,7 +66,7 @@
           </div>
         </div>
 
-        <div class="flex-grow md:max-w-md">
+        <div class="w-full">
           <h3 class="font-semibold text-sm mb-2 text-text-secondary">بحث سريع</h3>
           <div class="relative">
             <span
@@ -62,7 +85,7 @@
               :value="searchQuery"
               @input="$emit('update:searchQuery', $event.target.value)"
               type="text"
-              placeholder="اسم المشروع أو الشركة..."
+              placeholder="اسم المشروع..."
               class="block w-full pl-10 pr-4 py-2 border border-surface-border rounded-lg bg-surface-ground text-text-primary focus:ring-2 focus:ring-primary outline-none transition-all sm:text-sm"
             />
           </div>
@@ -75,25 +98,41 @@
 <script setup>
 import AppCard from '@/components/ui/AppCard.vue'
 import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
+import ProjectTypesDropdown from '@/components/forms/ProjectTypesDropdown.vue'
+import AppDropdown from '@/components/ui/AppDropdown.vue'
 
 defineProps({
-  // قيمة فلتر الشركة
-  modelValue: {
-    type: [String, Number, null],
-    default: null,
-  },
-  // قيمة نص البحث
-  searchQuery: {
-    type: String,
-    default: '',
-  },
-  // قيمة فلتر إذن التعاقد
-  permissionFilter: {
-    type: [String, Number, null],
-    default: '',
-  },
+  // فلتر الشركة
+  modelValue: { type: [String, Number, null], default: null },
+
+  // فلتر نوع المشروع (الجديد)
+  projectTypeFilter: { type: [String, Number, null], default: null },
+
+  // فلتر حالة الإنجاز (الجديد - اسم متغير معبر)
+  completionStatusFilter: { type: String, default: '' },
+
+  // فلتر البحث النصي
+  searchQuery: { type: String, default: '' },
+
+  // فلتر الإذن
+  permissionFilter: { type: [String, Number, null], default: '' },
 })
 
-// إبلاغ الأب بتحديث القيم
-defineEmits(['update:modelValue', 'update:searchQuery', 'update:permissionFilter'])
+defineEmits([
+  'update:modelValue',
+  'update:projectTypeFilter',
+  'update:completionStatusFilter',
+  'update:searchQuery',
+  'update:permissionFilter',
+])
+
+// خيارات الحالة (Smart Ranges) التي ستذهب للباك إند
+const completionOptions = [
+  { id: '', name: 'الكل' },
+  { id: 'completed', name: 'مكتملة (100%)' },
+  { id: 'in_progress', name: 'قيد التنفيذ (1% - 99%)' },
+  { id: 'not_started', name: 'لم تبدأ (0%)' },
+  { id: 'almost_done', name: 'على وشك الانتهاء (> 80%)' },
+  { id: 'just_started', name: 'في البداية (< 20%)' },
+]
 </script>

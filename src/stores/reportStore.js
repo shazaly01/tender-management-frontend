@@ -8,6 +8,7 @@ export const useReportStore = defineStore('report', () => {
   const companyStatement = ref(null)
   const ownerStatement = ref(null)
   const companiesSummary = ref([]) // [جديد] حالة التقرير العام
+  const projectsReport = ref(null)
   const grandSummary = ref(null) // [جديد] حالة الإجماليات النهائية
   const loading = ref(false)
   const error = ref(null)
@@ -79,11 +80,32 @@ export const useReportStore = defineStore('report', () => {
     }
   }
 
+  /**
+   * [جديد] جلب تقرير المشاريع المخصص بناءً على الفلاتر
+   * @param {Object} filters - كائن الفلاتر
+   */
+  async function fetchProjectsReportByFilter(filters) {
+    loading.value = true
+    error.value = null
+    projectsReport.value = null // تصفير البيانات القديمة
+
+    try {
+      // استدعاء الدالة التي أضفناها للتو في reportService
+      const response = await reportService.getProjectsReportByFilter(filters)
+      projectsReport.value = response.data.data
+    } catch (err) {
+      error.value = 'فشل في جلب تقرير المشاريع المخصص.'
+      console.error(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   // --- Return public API ---
   return {
     dashboardStats,
     companyStatement,
-
+    projectsReport,
     // +++ [أضف هذين السطرين] +++
     ownerStatement, // المتغير
     fetchOwnerStatement, // الدالة
@@ -95,6 +117,7 @@ export const useReportStore = defineStore('report', () => {
     error,
     fetchDashboardStats,
     fetchCompanyStatement,
+    fetchProjectsReportByFilter,
     fetchCompaniesSummary,
   }
 })

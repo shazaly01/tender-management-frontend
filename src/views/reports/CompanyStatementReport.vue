@@ -17,7 +17,7 @@
     <AppCard class="mb-8">
       <h3 class="font-semibold text-lg mb-4">خيارات التقرير</h3>
 
-      <div class="space-y-4 max-w-2xl">
+      <div class="space-y-4 max-w-4xl">
         <div class="flex items-center gap-6 border-b border-gray-100 pb-4">
           <label class="inline-flex items-center cursor-pointer">
             <input
@@ -40,6 +40,17 @@
             />
             <span class="mr-2 text-text-primary">كشف حساب جهة مالكة</span>
           </label>
+
+          <label class="inline-flex items-center cursor-pointer">
+            <input
+              type="radio"
+              v-model="reportType"
+              value="custom"
+              class="form-radio text-teal-500 h-5 w-5"
+              @change="resetData"
+            />
+            <span class="mr-2 text-text-primary">تقرير مخصص</span>
+          </label>
         </div>
 
         <div>
@@ -52,12 +63,41 @@
           />
 
           <OwnersDropdown
-            v-else
+            v-else-if="reportType === 'owner'"
             id="report-owner-select"
             label="اختر الجهة المالكة"
             v-model="selectedId"
             @update:modelValue="fetchReport"
           />
+
+          <div v-else-if="reportType === 'custom'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <ProjectTypesDropdown
+                id="report-project-type-filter"
+                label="اختر نوع المشروع"
+                v-model="projectTypeFilter"
+                @update:modelValue="
+                  (val, item) => {
+                    // هنا نفترض أن المكون يرسل الكائن المختار كمعامل ثاني
+                    // إذا كان يرسل الـ ID فقط، سنحتاج لتعديل آخر
+                    projectTypeName = item?.name || ''
+                    fetchReport()
+                  }
+                "
+                placeholder="الكل"
+              />
+            </div>
+            <div>
+              <AppDropdown
+                id="report-completion-status-filter"
+                label="اختر حالة الإنجاز"
+                v-model="completionStatusFilter"
+                @update:modelValue="fetchReport"
+                :options="completionOptions"
+                placeholder="الكل"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </AppCard>
@@ -77,12 +117,21 @@
           </div>
         </div>
 
-        <div v-else>
+        <div v-else-if="reportType === 'owner'">
           <h2 class="text-xl font-bold text-sky-600 mb-2">{{ reportData.owner?.name }}</h2>
           <div class="text-sm text-text-secondary">
             <p>
               تقرير مجمع للمشاريع التابعة لـ <strong>{{ reportData.owner?.name }}</strong>
             </p>
+          </div>
+        </div>
+
+        <div v-else-if="reportType === 'custom'">
+          <h2 class="text-xl font-bold text-teal-600 mb-2">
+            {{ reportData.report_info?.title || 'تقرير مشاريع مخصص' }}
+          </h2>
+          <div class="text-sm text-text-secondary">
+            <p>تقرير مالي مجمع للمشاريع التي تطابق الفلاتر المحددة.</p>
           </div>
         </div>
       </div>
@@ -135,22 +184,16 @@
             </h4>
 
             <div class="flex flex-col gap-0.5 mt-1 text-xs">
-              <div v-if="project.contract_number" class="flex items-center gap-1.5">
-                <span class="text-gray-500">رقم العقد:</span>
-                <span class="font-mono text-emerald-500">{{ project.contract_number }}</span>
-              </div>
-
-              <div v-if="reportType === 'company'" class="flex items-center gap-1.5">
-                <span class="text-gray-500">المالك:</span>
-                <span class="text-sky-500">{{
-                  project.owner?.name || project.project_owner || 'غير محدد'
-                }}</span>
-              </div>
-
-              <div v-else class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5">
                 <span class="text-gray-500">الشركة المنفذة:</span>
                 <span class="text-indigo-500 font-bold">{{
                   project.company?.name || 'غير محدد'
+                }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-500">المالك:</span>
+                <span class="text-sky-500">{{
+                  project.owner?.name || project.project_owner || 'غير محدد'
                 }}</span>
               </div>
             </div>
@@ -174,20 +217,21 @@
         </div>
 
         <div v-if="reportData.projects?.length === 0" class="text-center py-8 text-text-muted">
-          لا توجد مشاريع مسجلة.
+          لا توجد مشاريع تطابق الفلاتر المحددة.
         </div>
       </div>
     </AppCard>
 
     <div v-else class="text-center text-text-muted py-10">
       <p v-if="reportType === 'company'">الرجاء اختيار شركة من القائمة لعرض كشف حسابها.</p>
-      <p v-else>الرجاء اختيار جهة مالكة من القائمة لعرض كشف حسابها.</p>
+      <p v-else-if="reportType === 'owner'">الرجاء اختيار جهة مالكة من القائمة لعرض كشف حسابها.</p>
+      <p v-else-if="reportType === 'custom'">الرجاء اختيار فلتر واحد على الأقل لعرض التقرير.</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { PrinterIcon } from '@heroicons/vue/24/outline'
 import AppButton from '@/components/ui/AppButton.vue'
@@ -198,28 +242,69 @@ import AppCard from '@/components/ui/AppCard.vue'
 import CompaniesDropdown from '@/components/forms/CompaniesDropdown.vue'
 import OwnersDropdown from '@/components/forms/OwnersDropdown.vue'
 import { formatCurrency } from '@/utils/formatters'
+import { useProjectTypeStore } from '@/stores/projectTypeStore' // أضف هذا السطر
+
+// استيراد المكونات الجديدة للفلترة
+import ProjectTypesDropdown from '@/components/forms/ProjectTypesDropdown.vue'
+import AppDropdown from '@/components/ui/AppDropdown.vue'
 
 const toast = useToast()
 const router = useRouter()
+const projectTypeStore = useProjectTypeStore()
+// --- الحالة الرئيسية (State) ---
 
-// نوع التقرير: 'company' أو 'owner'
+// نوع التقرير: 'company', 'owner', أو 'custom'
 const reportType = ref('company')
-// المعرف المختار (سواء كان id شركة أو id مالك)
+
+// المعرف المختار (لشركة أو مالك)
 const selectedId = ref(null)
 
+// متغيرات الفلاتر الجديدة للتقرير المخصص
+const projectTypeFilter = ref(null)
+const completionStatusFilter = ref('')
+
+// بيانات التقرير والحالة
 const reportData = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const projectTypeName = ref('') // سنخزن فيه الاسم المختار
 
-// دالة لتصفير البيانات عند تغيير نوع التقرير
+// خيارات قائمة حالة الإنجاز
+const completionOptions = [
+  { id: '', name: 'الكل' },
+  { id: 'completed', name: 'مكتملة (100%)' },
+  { id: 'in_progress', name: 'قيد التنفيذ (1% - 99%)' },
+  { id: 'not_started', name: 'لم تبدأ (0%)' },
+  { id: 'almost_done', name: 'على وشك الانتهاء (> 80%)' },
+  { id: 'just_started', name: 'في البداية (< 20%)' },
+]
+
+// --- الدوال (Functions) ---
+
+/**
+ * دالة لتصفير كل البيانات عند تغيير نوع التقرير الرئيسي.
+ */
 const resetData = () => {
   selectedId.value = null
+  projectTypeFilter.value = null
+  completionStatusFilter.value = ''
   reportData.value = null
   error.value = null
 }
 
+/**
+ * الدالة الأساسية لجلب بيانات التقرير من الواجهة الخلفية.
+ * تتعامل بذكاء مع الأنواع الثلاثة للتقارير.
+ */
 async function fetchReport() {
-  if (!selectedId.value) {
+  // الشرط 1: لا تفعل شيئاً إذا كان النوع شركة/مالك ولم يتم اختيار ID
+  if ((reportType.value === 'company' || reportType.value === 'owner') && !selectedId.value) {
+    reportData.value = null
+    return
+  }
+
+  // الشرط 2: لا تفعل شيئاً إذا كان النوع مخصص ولم يتم اختيار أي فلتر
+  if (reportType.value === 'custom' && !projectTypeFilter.value && !completionStatusFilter.value) {
     reportData.value = null
     return
   }
@@ -230,12 +315,19 @@ async function fetchReport() {
 
   try {
     let response
+    let params = {}
 
-    // جلب البيانات بناءً على النوع المختار بشكل مستقل
-    if (reportType.value === 'company') {
+    if (reportType.value === 'custom') {
+      // بناء بارامترات الفلترة للتقرير المخصص
+      if (projectTypeFilter.value) params.project_type_id = projectTypeFilter.value
+      if (completionStatusFilter.value) params.completion_status = completionStatusFilter.value
+
+      // استدعاء الدالة الجديدة في الخدمة (يجب إضافتها في reportService.js)
+      response = await reportService.getProjectsReportByFilter(params)
+    } else if (reportType.value === 'company') {
       response = await reportService.getCompanyStatement(selectedId.value)
     } else {
-      // يجب التأكد من وجود هذه الدالة في ملف reportService كما شرحنا سابقاً
+      // owner
       response = await reportService.getOwnerStatement(selectedId.value)
     }
 
@@ -249,22 +341,57 @@ async function fetchReport() {
   }
 }
 
-const reportTitle = computed(() => {
-  if (!reportData.value) return 'تقرير كشف الحساب'
-  return reportType.value === 'company' ? `كشف حساب شركة` : `كشف حساب جهة مالكة`
-})
-
+/**
+ * دالة لفتح صفحة الطباعة مع تمرير البيانات.
+ */
 const handlePrint = () => {
   if (!reportData.value) return
 
-  // نرسل نوع التقرير مع البيانات ليتم تنسيق الطباعة بشكل صحيح
-  const printPayload = {
-    ...reportData.value,
-    reportType: reportType.value, // إضافة النوع لتمييزه في صفحة الطباعة
+  // 1. جلب اسم "نوع المشروع" من الستور باستخدام الـ ID المختار
+  const selectedType = projectTypeStore.projectTypes.find((t) => t.id === projectTypeFilter.value)
+  const projectTypeNameLabel = selectedType ? selectedType.name : ''
+
+  // 2. جلب نص "حالة الإنجاز" من القائمة المحلية
+  const selectedStatus = completionOptions.find((opt) => opt.id === completionStatusFilter.value)
+  const statusLabel = selectedStatus && selectedStatus.id !== '' ? selectedStatus.name : ''
+
+  // 3. تجهيز كائن معلومات الفلتر
+  const filterInfo = {
+    projectTypeName: projectTypeNameLabel, // الآن سيظهر الاسم الحقيقي (مثل: معماري)
+    completionStatusName: statusLabel,
   }
 
+  const printPayload = {
+    ...reportData.value,
+    reportType: reportType.value,
+    filterInfo: filterInfo,
+  }
+
+  // حفظ البيانات وفتح صفحة الطباعة
   sessionStorage.setItem('printStatementData', JSON.stringify(printPayload))
   const routeData = router.resolve({ name: 'PrintCompanyStatement' })
   window.open(routeData.href, '_blank')
 }
+// --- الخصائص المحسوبة (Computed Properties) ---
+
+/**
+ * يحدد عنوان الصفحة ديناميكياً بناءً على نوع التقرير.
+ */
+const reportTitle = computed(() => {
+  if (reportType.value === 'custom') {
+    // إذا كان هناك بيانات، نعرض عنواناً أكثر تفصيلاً
+    return reportData.value ? 'تقرير مالي حسب الفلتر' : 'تقرير مشاريع مخصص'
+  }
+  if (!reportData.value) return 'تقرير كشف الحساب'
+  return reportType.value === 'company' ? `كشف حساب شركة` : `كشف حساب جهة مالكة`
+})
+
+// --- المراقبون (Watchers) ---
+
+/**
+ * مراقبة تغيير نوع التقرير الرئيسي لتصفير البيانات.
+ */
+watch(reportType, () => {
+  resetData()
+})
 </script>

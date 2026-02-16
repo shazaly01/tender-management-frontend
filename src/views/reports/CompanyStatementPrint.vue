@@ -1,5 +1,6 @@
 <template>
   <div class="print-portrait-container bg-white text-black p-4 font-sans" dir="rtl">
+    <!-- 1. رأس التقرير: العنوان الرئيسي والعنوان الفرعي الديناميكي -->
     <div class="flex justify-between items-center border-b-2 border-gray-900 pb-4 mb-6">
       <div class="flex items-center gap-4">
         <img src="/MainLogo2.png" alt="Logo" class="w-16 h-16 object-contain" />
@@ -8,13 +9,13 @@
           <p class="text-base font-bold text-gray-600">{{ reportTitle }}</p>
         </div>
       </div>
-
       <div class="text-left text-xs font-medium text-gray-500 border-r-2 border-gray-200 pr-4">
         <p>تاريخ التقرير: {{ currentDate }}</p>
         <p>وقت الاستخراج: {{ currentTime }}</p>
       </div>
     </div>
 
+    <!-- 2. صندوق معلومات التقرير: يعرض بيانات الشركة، المالك، أو الفلاتر المخصصة -->
     <div v-if="reportData" class="bg-gray-50 border border-gray-200 rounded p-3 mb-6">
       <div v-if="reportType === 'company'" class="grid grid-cols-3 gap-4">
         <div>
@@ -33,7 +34,7 @@
         </div>
       </div>
 
-      <div v-else class="grid grid-cols-3 gap-4">
+      <div v-else-if="reportType === 'owner'" class="grid grid-cols-3 gap-4">
         <div class="col-span-2">
           <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">اسم الجهة المالكة</p>
           <p class="text-sm font-black text-gray-900 truncate">{{ reportData.owner?.name }}</p>
@@ -43,8 +44,22 @@
           <p class="text-sm font-bold text-gray-800">مجمع مشاريع</p>
         </div>
       </div>
+
+      <div v-else-if="reportType === 'custom'" class="grid grid-cols-3 gap-4">
+        <div class="col-span-2">
+          <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">فلاتر التقرير</p>
+          <p class="text-sm font-black text-gray-900 truncate">
+            {{ customReportFiltersText }}
+          </p>
+        </div>
+        <div>
+          <p class="text-[10px] text-gray-500 font-bold uppercase mb-1">عدد المشاريع المطابقة</p>
+          <p class="text-sm font-bold text-gray-800">{{ reportData.projects?.length || 0 }}</p>
+        </div>
+      </div>
     </div>
 
+    <!-- 3. الملخص المالي: يعرض الإجماليات -->
     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
       <div class="border border-gray-200 p-2 rounded flex flex-col justify-center">
         <p class="text-gray-500 text-[10px] font-bold mb-1 uppercase">إجمالي العقود الكلية</p>
@@ -52,28 +67,24 @@
           {{ formatCurrency(reportData?.summary?.total_contract_value || 0) }}
         </p>
       </div>
-
       <div class="border border-gray-200 p-2 rounded flex flex-col justify-center">
         <p class="text-gray-500 text-[10px] font-bold mb-1 uppercase">إجمالي القيمة المستحقة</p>
         <p class="text-lg font-black text-black">
           {{ formatCurrency(reportData?.summary?.total_due_value || 0) }}
         </p>
       </div>
-
       <div class="border border-gray-200 p-2 rounded flex flex-col justify-center">
         <p class="text-gray-500 text-[10px] font-bold mb-1 uppercase">إجمالي المقبوضات</p>
         <p class="text-lg font-black text-emerald-700">
           {{ formatCurrency(reportData?.summary?.total_payments_received || 0) }}
         </p>
       </div>
-
       <div class="border border-gray-200 p-2 rounded flex flex-col justify-center">
         <p class="text-gray-500 text-[10px] font-bold mb-1 uppercase">الرصيد المتبقي</p>
         <p class="text-lg font-black text-rose-700">
           {{ formatCurrency(reportData?.summary?.total_remaining || 0) }}
         </p>
       </div>
-
       <div
         class="border border-gray-200 p-2 rounded flex flex-col justify-center col-span-2 md:col-span-1"
       >
@@ -85,6 +96,7 @@
       </div>
     </div>
 
+    <!-- 4. جدول تفاصيل المشاريع -->
     <div class="w-full mb-8">
       <table class="w-full text-right border-collapse table-auto">
         <thead>
@@ -108,7 +120,6 @@
             </td>
             <td class="p-1 border border-gray-300 align-top">
               <p class="font-black text-xs mb-1">{{ project.name }}</p>
-
               <div class="flex flex-wrap items-center gap-2 text-[10px] text-gray-600 mt-0.5">
                 <div v-if="project.contract_number" class="flex items-center gap-1">
                   <span>عقد:</span>
@@ -118,29 +129,26 @@
                     {{ project.contract_number }}
                   </span>
                 </div>
-
                 <span v-if="project.contract_number" class="text-gray-300">|</span>
-
-                <div v-if="reportType === 'company'" class="flex items-center gap-1">
-                  <span>المالك:</span>
-                  <span class="font-bold text-black">
-                    {{ project.owner?.name || project.project_owner || 'غير محدد' }}
-                  </span>
-                </div>
-
-                <div v-else class="flex items-center gap-1">
+                <!-- هذا الجزء يعرض الشركة والمالك لكل مشروع، وهو مفيد لكل أنواع التقارير -->
+                <div class="flex items-center gap-1">
                   <span>المنفذ:</span>
                   <span class="font-bold text-black">
                     {{ project.company?.name || 'غير محدد' }}
                   </span>
                 </div>
+                <span class="text-gray-300">|</span>
+                <div class="flex items-center gap-1">
+                  <span>المالك:</span>
+                  <span class="font-bold text-black">
+                    {{ project.owner?.name || project.project_owner || 'غير محدد' }}
+                  </span>
+                </div>
               </div>
             </td>
-
             <td class="p-1 border border-gray-300 text-gray-600 whitespace-nowrap align-top">
               {{ formatNumber(project.contract_value) }}
             </td>
-
             <td class="p-1 border border-gray-300 whitespace-nowrap align-top">
               {{ formatNumber(project.due_value) }}
             </td>
@@ -159,7 +167,6 @@
               }}
             </td>
           </tr>
-
           <tr v-if="!reportData?.projects?.length">
             <td colspan="6" class="p-4 text-center text-gray-500 text-xs">
               لا توجد مشاريع مسجلة في هذا التقرير
@@ -169,6 +176,7 @@
       </table>
     </div>
 
+    <!-- 5. تذييل التقرير: أماكن التوقيعات -->
     <div
       class="mt-8 grid grid-cols-3 gap-4 text-center pt-4 border-t border-gray-100 break-inside-avoid"
     >
@@ -186,6 +194,7 @@
       </div>
     </div>
 
+    <!-- 6. تذييل الطباعة: رقم الصفحة -->
     <div
       class="print-footer fixed bottom-0 left-0 w-full text-center text-[10px] text-gray-500 border-t border-gray-200 pt-1 bg-white hidden print:block"
     >
@@ -198,28 +207,66 @@
 import { ref, onMounted, computed } from 'vue'
 import { formatCurrency } from '@/utils/formatters'
 
+// --- الحالة (State) ---
 const reportData = ref(null)
-// متغير جديد لتحديد نوع التقرير (افتراضياً شركة)
-const reportType = ref('company')
+const reportType = ref('company') // القيمة الافتراضية
 
+// --- المتغيرات المساعدة ---
 const currentDate = new Date().toLocaleDateString('ar-EG')
 const currentTime = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
 
-// عنوان التقرير الديناميكي
-const reportTitle = computed(() => {
-  return reportType.value === 'company'
-    ? 'تقرير كشف حساب شركة تفصيلي'
-    : 'تقرير كشف حساب جهة مالكة تفصيلي'
+// --- الخصائص المحسوبة (Computed Properties) ---
+
+/**
+ * يبني نصاً وصفياً من معلومات الفلاتر الممررة للتقرير المخصص.
+ * مثال: "المشاريع المكتملة" أو "مشاريع البنية التحتية و المشاريع قيد التنفيذ"
+ */
+const customReportFiltersText = computed(() => {
+  // التأكد من وجود بيانات الفلتر
+  if (!reportData.value?.filterInfo) return 'لا توجد فلاتر'
+
+  const { projectTypeName, completionStatusName } = reportData.value.filterInfo
+
+  // تجميع أسماء الفلاتر الموجودة فقط
+  const parts = [projectTypeName, completionStatusName].filter(Boolean)
+
+  if (parts.length === 0) return 'كل المشاريع'
+  return parts.join(' و ')
 })
 
+/**
+ * يبني عنوان التقرير الرئيسي بشكل ديناميكي بناءً على نوع التقرير والفلاتر.
+ */
+const reportTitle = computed(() => {
+  if (reportType.value === 'custom') {
+    return `تقرير مالي لـ: ${customReportFiltersText.value}`
+  }
+  if (reportType.value === 'owner') {
+    return 'تقرير كشف حساب جهة مالكة تفصيلي'
+  }
+  // القيمة الافتراضية هي تقرير الشركة
+  return 'تقرير كشف حساب شركة تفصيلي'
+})
+
+// --- الدوال (Functions) ---
+
+/**
+ * دالة لتنسيق الأرقام داخل الجدول بدون علامة العملة.
+ */
 const formatNumber = (value) => {
   if (value === undefined || value === null) return '0'
+  // يستخدم لتنسيق الأرقام مع فواصل الآلاف فقط
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value)
 }
 
+// --- دورة حياة المكون (Lifecycle Hooks) ---
+
+/**
+ * عند تحميل المكون، يتم قراءة البيانات من sessionStorage وطباعة التقرير.
+ */
 onMounted(() => {
   const savedData = sessionStorage.getItem('printStatementData')
 
@@ -227,19 +274,21 @@ onMounted(() => {
     try {
       const parsed = JSON.parse(savedData)
 
-      // هنا نستلم نوع التقرير الذي أرسلناه من الصفحة السابقة
+      // تحديث نوع التقرير بناءً على البيانات المحفوظة
       if (parsed.reportType) {
         reportType.value = parsed.reportType
       }
 
-      // نضع البيانات في المتغير
+      // وضع كل البيانات المحفوظة في متغير الحالة
       reportData.value = parsed
 
+      // تأخير الطباعة قليلاً للسماح للمتصفح برسم كل عناصر الصفحة
       setTimeout(() => {
         window.print()
       }, 1000)
     } catch (e) {
-      console.error('Error parsing print data', e)
+      console.error('خطأ في تحليل بيانات الطباعة من sessionStorage', e)
+      // يمكنك هنا عرض رسالة خطأ للمستخدم إذا لزم الأمر
     }
   }
 })
