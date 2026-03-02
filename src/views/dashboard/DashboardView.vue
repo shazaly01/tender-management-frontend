@@ -16,24 +16,38 @@
     <!-- يمكنك إضافة مكونات أخرى هنا لاحقًا، مثل الرسوم البيانية -->
   </div>
 </template>
-
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useReportStore } from '@/stores/reportStore'
+import { useAuthStore } from '@/stores/authStore' // 1. استيراد مخزن المصادقة
 import { storeToRefs } from 'pinia'
 
 import DashboardStatsCards from './DashboardStatsCards.vue'
 
-// 1. استدعاء الـ store
 const reportStore = useReportStore()
+const authStore = useAuthStore() // 2. تهيئة مخزن المصادقة
 
-// 2. استخراج المتغيرات من الـ store بشكل تفاعلي (reactive)
-//    `dashboardStats` سيحتوي على بيانات الإحصائيات.
-//    `loading` و `error` سيساعداننا في عرض حالة التحميل أو الأخطاء.
 const { dashboardStats, loading, error } = storeToRefs(reportStore)
 
-// 3. عند تحميل المكون، قم بجلب البيانات
+// 3. التحقق مما إذا كان المستخدم يملك صلاحية رؤية الإحصائيات
+const canViewStats = computed(() => authStore.can('dashboard.view'))
+
+// 4. إنشاء متغير تفاعلي يقرر أي بيانات سيتم عرضها
+const displayStats = computed(() => {
+  if (canViewStats.value) {
+    // إذا كان لديه صلاحية، اعرض البيانات الحقيقية القادمة من الخادم
+    return dashboardStats.value
+  } else {
+    // إذا لم يكن لديه صلاحية، أرسل كائن فارغ.
+    // (مكون DashboardStatsCards يجب أن يكون مبرمجاً لعرض صفر 0 إذا لم يجد قيمة)
+    return {}
+  }
+})
+
 onMounted(() => {
-  reportStore.fetchDashboardStats()
+  // 5. جلب البيانات من الخادم "فقط" إذا كان المستخدم يملك الصلاحية
+  if (canViewStats.value) {
+    reportStore.fetchDashboardStats()
+  }
 })
 </script>

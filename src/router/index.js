@@ -46,7 +46,7 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: DashboardView,
-        meta: { permission: 'dashboard.view' },
+        // meta: { permission: 'dashboard.view' },
       },
 
       // --- مسارات إدارة النظام ---
