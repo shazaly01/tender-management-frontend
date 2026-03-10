@@ -176,7 +176,7 @@
         <div
           v-for="project in reportData.projects"
           :key="project.id"
-          class="border border-surface-border rounded-lg p-4 grid grid-cols-5 gap-4 items-center"
+          class="border border-surface-border rounded-lg p-4 grid grid-cols-7 gap-4 items-center"
         >
           <div class="col-span-2">
             <h4 class="font-semibold text-base text-text-primary truncate" :title="project.name">
@@ -212,6 +212,20 @@
             <p class="text-sm text-text-muted">إجمالي المدفوع</p>
             <p class="font-bold text-success">
               {{ formatCurrency(project.total_paid || project.payments_sum_amount || 0) }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-text-muted">مؤيدات الصرف</p>
+            <p :class="getDisbursementStatusClass(project.disbursement_status)" class="font-bold">
+              {{ getDisbursementStatusLabel(project.disbursement_status) }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-text-muted">الموقف التعاقدي</p>
+            <p :class="getContractualStatusClass(project.contractual_status)" class="font-bold">
+              {{ getContractualStatusLabel(project.contractual_status) }}
             </p>
           </div>
         </div>
@@ -339,6 +353,42 @@ async function fetchReport() {
   } finally {
     loading.value = false
   }
+}
+
+/**
+ * ترجمة حالة مؤيدات الصرف
+ */
+const getDisbursementStatusLabel = (status) => {
+  if (status === 'fulfilled') return 'مستوفى'
+  if (status === 'unfulfilled') return 'غير مستوفى'
+  return 'غير محدد'
+}
+
+/**
+ * تحديد لون حالة مؤيدات الصرف
+ */
+const getDisbursementStatusClass = (status) => {
+  if (status === 'fulfilled') return 'text-emerald-500' // أخضر
+  if (status === 'unfulfilled') return 'text-rose-500' // أحمر
+  return 'text-gray-400'
+}
+
+/**
+ * ترجمة حالة الموقف التعاقدي
+ */
+const getContractualStatusLabel = (status) => {
+  if (status === 'compliant') return 'مطابق'
+  if (status === 'non_compliant') return 'غير مطابق'
+  return 'غير محدد'
+}
+
+/**
+ * تحديد لون حالة الموقف التعاقدي
+ */
+const getContractualStatusClass = (status) => {
+  if (status === 'compliant') return 'text-emerald-500' // أخضر
+  if (status === 'non_compliant') return 'text-rose-500' // أحمر
+  return 'text-gray-400'
 }
 
 /**

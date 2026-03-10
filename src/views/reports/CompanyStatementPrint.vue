@@ -100,13 +100,15 @@
     <div class="w-full mb-8">
       <table class="w-full text-right border-collapse table-auto">
         <thead>
-          <tr class="bg-gray-800 text-white print:bg-gray-200 print:text-black text-xs">
-            <th class="p-1 border border-gray-600 w-8 text-center">#</th>
-            <th class="p-1 border border-gray-600">بيانات المشروع</th>
-            <th class="p-1 border border-gray-600 w-24 font-bold">قيمة العقد</th>
-            <th class="p-1 border border-gray-600 w-24 font-bold">المستحق</th>
-            <th class="p-1 border border-gray-600 w-24 font-bold">المدفوع</th>
-            <th class="p-1 border border-gray-600 w-24 font-bold">المتبقي</th>
+          <tr class="bg-gray-800 text-white print:bg-gray-200 print:text-black text-[10px]">
+            <th class="p-1 border border-gray-600 w-6 text-center">#</th>
+            <th class="p-1 border border-gray-600 w-auto">بيانات المشروع</th>
+            <th class="p-1 border border-gray-600 w-16 font-bold text-center">م. الصرف</th>
+            <th class="p-1 border border-gray-600 w-16 font-bold text-center">م. تعاقدي</th>
+            <th class="p-1 border border-gray-600 w-20 font-bold">قيمة العقد</th>
+            <th class="p-1 border border-gray-600 w-20 font-bold">المستحق</th>
+            <th class="p-1 border border-gray-600 w-20 font-bold">المدفوع</th>
+            <th class="p-1 border border-gray-600 w-20 font-bold">المتبقي</th>
           </tr>
         </thead>
         <tbody class="text-[11px]">
@@ -130,7 +132,6 @@
                   </span>
                 </div>
                 <span v-if="project.contract_number" class="text-gray-300">|</span>
-                <!-- هذا الجزء يعرض الشركة والمالك لكل مشروع، وهو مفيد لكل أنواع التقارير -->
                 <div class="flex items-center gap-1">
                   <span>المنفذ:</span>
                   <span class="font-bold text-black">
@@ -146,6 +147,34 @@
                 </div>
               </div>
             </td>
+
+            <td class="p-1 border border-gray-300 text-center align-top whitespace-nowrap">
+              <span
+                v-if="project.disbursement_status === 'fulfilled'"
+                class="text-emerald-700 font-bold"
+                >مستوفى</span
+              >
+              <span
+                v-else-if="project.disbursement_status === 'unfulfilled'"
+                class="text-rose-700 font-bold"
+                >غير مستوفى</span
+              >
+              <span v-else class="text-gray-400">-</span>
+            </td>
+            <td class="p-1 border border-gray-300 text-center align-top whitespace-nowrap">
+              <span
+                v-if="project.contractual_status === 'compliant'"
+                class="text-emerald-700 font-bold"
+                >مطابق</span
+              >
+              <span
+                v-else-if="project.contractual_status === 'non_compliant'"
+                class="text-rose-700 font-bold"
+                >غير مطابق</span
+              >
+              <span v-else class="text-gray-400">-</span>
+            </td>
+
             <td class="p-1 border border-gray-300 text-gray-600 whitespace-nowrap align-top">
               {{ formatNumber(project.contract_value) }}
             </td>
@@ -168,7 +197,7 @@
             </td>
           </tr>
           <tr v-if="!reportData?.projects?.length">
-            <td colspan="6" class="p-4 text-center text-gray-500 text-xs">
+            <td colspan="8" class="p-4 text-center text-gray-500 text-xs">
               لا توجد مشاريع مسجلة في هذا التقرير
             </td>
           </tr>

@@ -73,19 +73,28 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <AppDropdown
+          id="disbursement-status"
+          label="مؤيدات الصرف"
+          v-model="form.disbursement_status"
+          :options="disbursementOptions"
+          placeholder="اختر الحالة (اختياري)"
+        />
+
+        <AppDropdown
+          id="contractual-status"
+          label="الموقف التعاقدي"
+          v-model="form.contractual_status"
+          :options="contractualOptions"
+          placeholder="اختر الموقف (اختياري)"
+        />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <CalculationOptionsDropdown
           id="project-calculation-option"
           label="خيار الاحتساب"
           v-model="form.calculation_option_id"
         />
-
-        <!-- <AppInput
-          id="project-award-date"
-          label="تاريخ الترسية"
-          v-model="form.award_date"
-          type="date"
-          required
-        /> -->
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -174,15 +183,26 @@ const completionOptions = [
   { id: 100, name: '100%' },
 ]
 
+// === [خيارات القوائم المنسدلة الجديدة] ===
+const disbursementOptions = [
+  { id: 'fulfilled', name: 'مستوفى' },
+  { id: 'unfulfilled', name: 'غير مستوفى' },
+]
+
+const contractualOptions = [
+  { id: 'compliant', name: 'مطابق' },
+  { id: 'non_compliant', name: 'غير مطابق' },
+]
+// ==========================================
+
 const createFreshForm = () => ({
   id: null,
   name: '',
-  // project_owner: '',
   owner_id: '',
   contract_number: '',
   region: '',
-  project_type_id: '', // القيمة الافتراضية فارغة
-  completion_percentage: 0, // القيمة الافتراضية 0
+  project_type_id: '',
+  completion_percentage: 0,
   calculation_option_id: '',
   company_id: '',
   contract_value: '',
@@ -190,6 +210,9 @@ const createFreshForm = () => ({
   award_date: '',
   description: '',
   has_contract_permission: false,
+  // === [تصفير الحقول الجديدة] ===
+  disbursement_status: '',
+  contractual_status: '',
 })
 
 const form = ref(createFreshForm())
@@ -205,7 +228,6 @@ watch(
       form.value = {
         id: newData.id,
         name: newData.name,
-        // project_owner: newData.project_owner || '',
         owner_id: newData.owner_id || '',
         contract_number: newData.contract_number || '',
         region: newData.region || '',
@@ -218,6 +240,9 @@ watch(
         award_date: formattedDate,
         description: newData.description || '',
         has_contract_permission: Boolean(newData.has_contract_permission),
+        // === [تعبئة الحقول الجديدة عند التعديل] ===
+        disbursement_status: newData.disbursement_status || '',
+        contractual_status: newData.contractual_status || '',
       }
     } else {
       form.value = createFreshForm()
@@ -228,17 +253,13 @@ watch(
 
 // دالة التحقق والإرسال
 const handleSubmit = () => {
-  // إعادة تعيين الأخطاء
   errors.company_id = false
 
-  // التحقق من أن حقل الشركة ليس فارغاً
   if (!form.value.company_id) {
     errors.company_id = true
-    // تركيز المتصفح على الحقل أو تنبيه المستخدم
     return
   }
 
-  // إذا نجح التحقق، نقوم بالإرسال
   emit('submit', { ...form.value })
 }
 
