@@ -21,6 +21,8 @@
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "pinia": "^3.0.3",

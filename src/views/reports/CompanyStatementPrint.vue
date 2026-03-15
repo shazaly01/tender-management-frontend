@@ -1,5 +1,22 @@
 <template>
   <div class="print-portrait-container bg-white text-black p-4 font-sans" dir="rtl">
+    <div
+      class="print:hidden flex justify-end gap-3 mb-4 bg-gray-50 border border-gray-200 p-3 rounded"
+    >
+      <button
+        @click="exportToExcel"
+        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2 transition-colors"
+      >
+        تصدير إلى إكسيل
+      </button>
+
+      <button
+        @click="printReport"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2 transition-colors"
+      >
+        طباعة التقرير
+      </button>
+    </div>
     <!-- 1. رأس التقرير: العنوان الرئيسي والعنوان الفرعي الديناميكي -->
     <div class="flex justify-between items-center border-b-2 border-gray-900 pb-4 mb-6">
       <div class="flex items-center gap-4">
@@ -235,6 +252,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { formatCurrency } from '@/utils/formatters'
+import { generateExcelReport } from '@/utils/excelExport'
 
 // --- الحالة (State) ---
 const reportData = ref(null)
@@ -278,6 +296,24 @@ const reportTitle = computed(() => {
 })
 
 // --- الدوال (Functions) ---
+
+const printReport = () => {
+  window.print()
+}
+
+const exportToExcel = async () => {
+  try {
+    // نقوم بتمرير البيانات من الواجهة إلى الملف المنفصل
+    await generateExcelReport(
+      reportData.value,
+      reportTitle.value,
+      reportType.value,
+      customReportFiltersText.value,
+    )
+  } catch (error) {
+    console.error('حدث خطأ أثناء تصدير الإكسيل:', error)
+  }
+}
 
 /**
  * دالة لتنسيق الأرقام داخل الجدول بدون علامة العملة.
